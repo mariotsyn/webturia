@@ -42,6 +42,7 @@
         setupMagnetic();
         setup3DTilt();
         setupSmooth();
+        setupAstroScroll();
         animate();
       });
     }, 2300);
@@ -736,6 +737,38 @@
         }
       });
     });
+  }
+
+  /* ═══════════════════════════════════════════════
+     ASTRONAUT SCROLLBAR
+     ═══════════════════════════════════════════════ */
+  function setupAstroScroll() {
+    const container = document.getElementById('astro-scroll');
+    const astro = document.getElementById('astroFloat');
+    if (!container || !astro) return;
+
+    // Show after a small delay
+    setTimeout(() => container.classList.add('active'), 500);
+
+    // Track boundaries (px from top/bottom of viewport)
+    const TRACK_TOP = 70;   // below rocket
+    const TRACK_BOTTOM = 55; // above moon
+
+    function updateAstroPosition() {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = Math.min(Math.max(scrollTop / docHeight, 0), 1);
+
+      // Map progress to track position
+      const trackHeight = window.innerHeight - TRACK_TOP - TRACK_BOTTOM;
+      const astroY = TRACK_TOP + progress * trackHeight;
+
+      astro.style.top = astroY + 'px';
+    }
+
+    // Use passive listener for performance
+    window.addEventListener('scroll', updateAstroPosition, { passive: true });
+    updateAstroPosition(); // initial position
   }
 
 })();
