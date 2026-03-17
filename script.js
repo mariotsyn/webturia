@@ -1,154 +1,478 @@
-// ============================================================
-// WEBTURIA — PREMIUM DARK AGENCY
-// Canvas particles · Custom cursor · GSAP hero
-// IntersectionObserver reveals · Counter animation
-// ============================================================
+// ════════════════════════════════════════════════════
+// WebTuria v2 — IMMERSIVE 3D SCROLL EXPERIENCE
+// Three.js desk scene · Scroll-linked camera · GSAP
+// ════════════════════════════════════════════════════
 (() => {
   'use strict';
+
+  /* ═══ GLOBALS ═══ */
+  let scene, camera, renderer, clock;
+  let desk = {}, floaters = [], particles;
+  let scrollProgress = 0;
+  let mouseNorm = { x: 0, y: 0 };
+  let contentRevealed = false;
+
+  // Camera positions (start → end)
+  const CAM_START = { x: 0, y: 4.5, z: 11 };
+  const CAM_MID   = { x: 0, y: 2.2, z: 5 };
+  const CAM_END   = { x: 0, y: 1.65, z: 0.6 };
+
+  const LOOK_START = { x: 0, y: 1.2, z: 0 };
+  const LOOK_END   = { x: 0, y: 1.6, z: -1 };
+
   window.addEventListener('DOMContentLoaded', init);
 
   function init() {
-    setupCanvas();
-    setupNav();
-    setupMobile();
-    setupSmooth();
-    setupCursor();
-
     // Preloader
     const pre = document.getElementById('preloader');
-    const PRELOADER_MS = 2200;
+    document.body.style.overflow = 'hidden';
 
-    if (pre) {
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => {
-        pre.classList.add('hidden');
-        document.body.style.overflow = '';
-        setTimeout(() => {
-          setupHero();
-          setupScrollReveals();
-          setupCounters();
-          setupMagnetic();
-          setup3DTilt();
-        }, 100);
-      }, PRELOADER_MS);
-    } else {
-      setupHero();
-      setupScrollReveals();
-      setupCounters();
-      setupMagnetic();
-      setup3DTilt();
-    }
+    setTimeout(() => {
+      if (pre) pre.classList.add('done');
+      document.body.style.overflow = '';
+      requestAnimationFrame(() => {
+        setupThree();
+        setupScrollCamera();
+        setupNav();
+        setupMobile();
+        setupCursor();
+        setupHeroGSAP();
+        setupScrollReveals();
+        setupCounters();
+        setupMagnetic();
+        setup3DTilt();
+        setupSmooth();
+        animate();
+      });
+    }, 2300);
   }
 
-  /* ═══════════════════════════════════════════════════
-     CANVAS — Particle network background
-     ═══════════════════════════════════════════════════ */
-  function setupCanvas() {
-    const canvas = document.getElementById('bgCanvas');
+  /* ═══════════════════════════════════════════════
+     THREE.JS — 3D DESK SCENE
+     ═══════════════════════════════════════════════ */
+  function setupThree() {
+    const canvas = document.getElementById('scene3d');
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let w, h;
-    let particles = [];
-    let mouseX = -1000, mouseY = -1000;
-    const PARTICLE_COUNT = window.innerWidth < 768 ? 35 : 65;
-    const CONNECTION_DIST = 150;
-    const MOUSE_DIST = 200;
 
-    function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize, { passive: true });
+    scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x0A0A0F, 6, 25);
 
-    // Track mouse for interactivity
+    clock = new THREE.Clock();
+
+    // Camera
+    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(CAM_START.x, CAM_START.y, CAM_START.z);
+    camera.lookAt(LOOK_START.x, LOOK_START.y, LOOK_START.z);
+
+    // Renderer
+    renderer = new THREE.WebGLRenderer({
+      canvas, antialias: true, alpha: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0A0A0F, 1);
+    renderer.shadowMap.enabled = false;
+
+    // Lights
+    const ambient = new THREE.AmbientLight(0x6366F1, 0.15);
+    scene.add(ambient);
+
+    const point1 = new THREE.PointLight(0x6366F1, 0.8, 20);
+    point1.position.set(-3, 4, 4);
+    scene.add(point1);
+
+    const point2 = new THREE.PointLight(0x06B6D4, 0.6, 20);
+    point2.position.set(3, 3, 2);
+    scene.add(point2);
+
+    const point3 = new THREE.PointLight(0x8B5CF6, 0.4, 15);
+    point3.position.set(0, 2, -2);
+    scene.add(point3);
+
+    // Build the desk scene
+    createDesk();
+    createMonitor();
+    createKeyboard();
+    createFloaters();
+    createGridFloor();
+    createParticles();
+
+    // Mouse tracking
     document.addEventListener('mousemove', e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      mouseNorm.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseNorm.y = (e.clientY / window.innerHeight - 0.5) * 2;
     });
 
-    class Particle {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = Math.random() * w;
-        this.y = Math.random() * h;
-        this.vx = (Math.random() - 0.5) * 0.4;
-        this.vy = (Math.random() - 0.5) * 0.4;
-        this.r = Math.random() * 1.5 + 0.5;
-        // Color: mix of accent colors
-        const colors = [
-          [99, 102, 241],   // Indigo
-          [6, 182, 212],    // Cyan
-          [139, 92, 246],   // Violet
-        ];
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.alpha = Math.random() * 0.5 + 0.15;
-      }
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }, { passive: true });
+  }
 
-        // Mouse repulsion
-        const dx = this.x - mouseX;
-        const dy = this.y - mouseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < MOUSE_DIST) {
-          const force = (MOUSE_DIST - dist) / MOUSE_DIST * 0.02;
-          this.vx += dx * force;
-          this.vy += dy * force;
+  /* ─── DESK ─── */
+  function createDesk() {
+    // Desk surface
+    const deskGeo = new THREE.BoxGeometry(5, 0.08, 2.5);
+    const deskMat = new THREE.MeshStandardMaterial({
+      color: 0x111122,
+      metalness: 0.6,
+      roughness: 0.4,
+    });
+    const deskMesh = new THREE.Mesh(deskGeo, deskMat);
+    deskMesh.position.set(0, 0.7, 0);
+    scene.add(deskMesh);
+    desk.surface = deskMesh;
+
+    // Desk legs
+    const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.7, 8);
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x0A0A12, metalness: 0.8, roughness: 0.3 });
+    const legPositions = [[-2.2, 0.35, -1], [2.2, 0.35, -1], [-2.2, 0.35, 1], [2.2, 0.35, 1]];
+    legPositions.forEach(p => {
+      const leg = new THREE.Mesh(legGeo, legMat);
+      leg.position.set(...p);
+      scene.add(leg);
+    });
+  }
+
+  /* ─── MONITOR ─── */
+  function createMonitor() {
+    // Monitor body (thin box)
+    const bodyGeo = new THREE.BoxGeometry(3, 1.8, 0.08);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x111122,
+      metalness: 0.7,
+      roughness: 0.3,
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.set(0, 1.64, -0.3);
+    scene.add(body);
+    desk.monitorBody = body;
+
+    // Screen (glowing emissive plane)
+    const screenGeo = new THREE.PlaneGeometry(2.7, 1.55);
+    const screenMat = new THREE.MeshBasicMaterial({
+      color: 0x6366F1,
+      transparent: true,
+      opacity: 0.25,
+    });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 1.64, -0.255);
+    scene.add(screen);
+    desk.screen = screen;
+
+    // Screen glow ring (edge highlight)
+    const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.72, 1.57, 0.01));
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x6366F1, transparent: true, opacity: 0.5 });
+    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLines.position.copy(screen.position);
+    scene.add(edgeLines);
+    desk.screenEdge = edgeLines;
+
+    // Monitor stand
+    const standGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x0A0A12, metalness: 0.8, roughness: 0.2 });
+    const stand = new THREE.Mesh(standGeo, standMat);
+    stand.position.set(0, 0.98, -0.3);
+    scene.add(stand);
+
+    // Stand base
+    const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.04, 16);
+    const base = new THREE.Mesh(baseGeo, standMat);
+    base.position.set(0, 0.75, -0.3);
+    scene.add(base);
+  }
+
+  /* ─── KEYBOARD ─── */
+  function createKeyboard() {
+    const kbGroup = new THREE.Group();
+
+    // Main body
+    const kbGeo = new THREE.BoxGeometry(1.4, 0.04, 0.5);
+    const kbMat = new THREE.MeshStandardMaterial({
+      color: 0x111122, metalness: 0.6, roughness: 0.4,
+    });
+    const kb = new THREE.Mesh(kbGeo, kbMat);
+    kbGroup.add(kb);
+
+    // Individual keys (subtle grid)
+    const keyGeo = new THREE.BoxGeometry(0.08, 0.025, 0.08);
+    const keyMat = new THREE.MeshStandardMaterial({
+      color: 0x1A1A2E, metalness: 0.5, roughness: 0.5,
+    });
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 12; col++) {
+        const key = new THREE.Mesh(keyGeo, keyMat);
+        key.position.set(-0.56 + col * 0.1, 0.035, -0.16 + row * 0.1);
+        kbGroup.add(key);
+      }
+    }
+
+    kbGroup.position.set(0, 0.74, 0.55);
+    scene.add(kbGroup);
+    desk.keyboard = kbGroup;
+
+    // Mouse
+    const mouseGeo = new THREE.BoxGeometry(0.18, 0.04, 0.3);
+    const mouseMat = new THREE.MeshStandardMaterial({
+      color: 0x111122, metalness: 0.6, roughness: 0.4,
+    });
+    const mouseMesh = new THREE.Mesh(mouseGeo, mouseMat);
+    mouseMesh.position.set(1.2, 0.74, 0.55);
+    // Round the mouse a bit
+    scene.add(mouseMesh);
+    desk.mouse = mouseMesh;
+
+    // Coffee mug
+    const mugGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.22, 16);
+    const mugMat = new THREE.MeshStandardMaterial({
+      color: 0x1A1A2E, metalness: 0.3, roughness: 0.6,
+    });
+    const mug = new THREE.Mesh(mugGeo, mugMat);
+    mug.position.set(-1.8, 0.85, 0.4);
+    scene.add(mug);
+    desk.mug = mug;
+  }
+
+  /* ─── FLOATING GEOMETRIC SHAPES ─── */
+  function createFloaters() {
+    const shapes = [
+      { geo: new THREE.IcosahedronGeometry(0.25, 0), pos: [-2.5, 3.5, -1], color: 0x6366F1 },
+      { geo: new THREE.OctahedronGeometry(0.18, 0), pos: [2.8, 2.8, 0.5], color: 0x06B6D4 },
+      { geo: new THREE.TorusGeometry(0.2, 0.06, 8, 20), pos: [-1.5, 4.2, 2], color: 0x8B5CF6 },
+      { geo: new THREE.TetrahedronGeometry(0.15, 0), pos: [1.8, 3.8, -2], color: 0x6366F1 },
+      { geo: new THREE.DodecahedronGeometry(0.12, 0), pos: [3.5, 4, 1.5], color: 0x06B6D4 },
+      { geo: new THREE.IcosahedronGeometry(0.15, 0), pos: [-3.2, 2.5, 2.5], color: 0x8B5CF6 },
+    ];
+
+    shapes.forEach(({ geo, pos, color }) => {
+      // Wireframe version for futuristic look
+      const wireGeo = new THREE.EdgesGeometry(geo);
+      const wireMat = new THREE.LineBasicMaterial({
+        color, transparent: true, opacity: 0.6,
+      });
+      const wire = new THREE.LineSegments(wireGeo, wireMat);
+      wire.position.set(...pos);
+      wire.userData = {
+        baseY: pos[1],
+        speed: 0.3 + Math.random() * 0.5,
+        rotSpeed: 0.2 + Math.random() * 0.4,
+        phase: Math.random() * Math.PI * 2,
+      };
+      scene.add(wire);
+      floaters.push(wire);
+
+      // Subtle solid inner
+      const solidMat = new THREE.MeshBasicMaterial({
+        color, transparent: true, opacity: 0.06,
+      });
+      const solid = new THREE.Mesh(geo, solidMat);
+      solid.position.copy(wire.position);
+      wire.userData.solid = solid;
+      scene.add(solid);
+    });
+  }
+
+  /* ─── GRID FLOOR ─── */
+  function createGridFloor() {
+    const gridHelper = new THREE.GridHelper(30, 60, 0x6366F1, 0x6366F1);
+    gridHelper.material.transparent = true;
+    gridHelper.material.opacity = 0.04;
+    gridHelper.position.y = 0;
+    scene.add(gridHelper);
+  }
+
+  /* ─── PARTICLES ─── */
+  function createParticles() {
+    const count = window.innerWidth < 768 ? 150 : 400;
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    const palette = [
+      [99/255, 102/255, 241/255],
+      [6/255, 182/255, 212/255],
+      [139/255, 92/255, 246/255],
+    ];
+
+    for (let i = 0; i < count; i++) {
+      positions[i*3]   = (Math.random() - 0.5) * 20;
+      positions[i*3+1] = Math.random() * 10;
+      positions[i*3+2] = (Math.random() - 0.5) * 20;
+
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      colors[i*3]   = c[0];
+      colors[i*3+1] = c[1];
+      colors[i*3+2] = c[2];
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const mat = new THREE.PointsMaterial({
+      size: 0.03,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.6,
+      sizeAttenuation: true,
+    });
+
+    particles = new THREE.Points(geo, mat);
+    scene.add(particles);
+  }
+
+  /* ═══════════════════════════════════════════════
+     SCROLL-LINKED CAMERA (GSAP ScrollTrigger)
+     ═══════════════════════════════════════════════ */
+  function setupScrollCamera() {
+    if (typeof gsap === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const heroEl = document.getElementById('hero');
+    const spacer = document.getElementById('zoom-spacer');
+    const flashEl = document.getElementById('flash-overlay');
+    const contentEl = document.getElementById('content');
+    const canvasEl = document.getElementById('scene3d');
+
+    // Hero fade out on scroll
+    gsap.to(heroEl, {
+      opacity: 0,
+      scale: 0.9,
+      scrollTrigger: {
+        trigger: heroEl,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1,
+      }
+    });
+
+    // Main camera timeline driven by scroll
+    ScrollTrigger.create({
+      trigger: spacer,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.5,
+      onUpdate: self => {
+        scrollProgress = self.progress;
+      }
+    });
+
+    // Flash + content reveal at end of zoom
+    ScrollTrigger.create({
+      trigger: spacer,
+      start: 'bottom-=300px bottom',
+      end: 'bottom bottom',
+      onEnter: () => {
+        if (!contentRevealed) {
+          contentRevealed = true;
+          // Flash effect
+          flashEl.classList.add('flash');
+          setTimeout(() => flashEl.classList.remove('flash'), 400);
+          // Reveal content
+          setTimeout(() => {
+            contentEl.classList.add('visible');
+            canvasEl.classList.add('fade');
+          }, 200);
         }
-
-        // Damping
-        this.vx *= 0.99;
-        this.vy *= 0.99;
-
-        // Wrap
-        if (this.x < -10) this.x = w + 10;
-        if (this.x > w + 10) this.x = -10;
-        if (this.y < -10) this.y = h + 10;
-        if (this.y > h + 10) this.y = -10;
+      },
+      onLeaveBack: () => {
+        contentRevealed = false;
+        contentEl.classList.remove('visible');
+        canvasEl.classList.remove('fade');
       }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.alpha})`;
-        ctx.fill();
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     ANIMATE — Main render loop
+     ═══════════════════════════════════════════════ */
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!scene || !camera || !renderer) return;
+
+    const t = clock.getElapsedTime();
+
+    // ── Camera position based on scroll progress ──
+    // Phase 1: 0-0.3 → approach from above
+    // Phase 2: 0.3-0.7 → zoom toward monitor
+    // Phase 3: 0.7-1.0 → enter the screen
+    const p = scrollProgress;
+
+    let camX, camY, camZ, lookY;
+
+    if (p < 0.4) {
+      // Start → Mid
+      const t2 = p / 0.4;
+      const ease = t2 * t2 * (3 - 2 * t2); // smoothstep
+      camX = lerp(CAM_START.x, CAM_MID.x, ease);
+      camY = lerp(CAM_START.y, CAM_MID.y, ease);
+      camZ = lerp(CAM_START.z, CAM_MID.z, ease);
+      lookY = lerp(LOOK_START.y, 1.5, ease);
+    } else {
+      // Mid → End (into the screen)
+      const t2 = (p - 0.4) / 0.6;
+      const ease = t2 * t2 * (3 - 2 * t2);
+      camX = lerp(CAM_MID.x, CAM_END.x, ease);
+      camY = lerp(CAM_MID.y, CAM_END.y, ease);
+      camZ = lerp(CAM_MID.z, CAM_END.z, ease);
+      lookY = lerp(1.5, LOOK_END.y, ease);
+    }
+
+    // Add subtle mouse-based camera offset
+    const mouseOffX = mouseNorm.x * 0.15 * (1 - p);
+    const mouseOffY = mouseNorm.y * 0.1 * (1 - p);
+
+    camera.position.x = camX + mouseOffX;
+    camera.position.y = camY + mouseOffY;
+    camera.position.z = camZ;
+    camera.lookAt(mouseOffX * 0.3, lookY, -1);
+
+    // ── Animate floaters ──
+    floaters.forEach(f => {
+      const d = f.userData;
+      f.rotation.x += d.rotSpeed * 0.01;
+      f.rotation.y += d.rotSpeed * 0.015;
+      f.position.y = d.baseY + Math.sin(t * d.speed + d.phase) * 0.3;
+      if (d.solid) {
+        d.solid.position.copy(f.position);
+        d.solid.rotation.copy(f.rotation);
       }
+    });
+
+    // ── Animate screen glow ──
+    if (desk.screen) {
+      const glow = 0.15 + Math.sin(t * 2) * 0.08;
+      desk.screen.material.opacity = glow + p * 0.3;
+    }
+    if (desk.screenEdge) {
+      desk.screenEdge.material.opacity = 0.3 + Math.sin(t * 3) * 0.15 + p * 0.3;
     }
 
-    // Init particles
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(new Particle());
-    }
-
-    function drawConnections() {
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < CONNECTION_DIST) {
-            const alpha = (1 - dist / CONNECTION_DIST) * 0.08;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(99,102,241,${alpha})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
+    // ── Animate particles ──
+    if (particles) {
+      particles.rotation.y += 0.0003;
+      const pos = particles.geometry.attributes.position.array;
+      for (let i = 1; i < pos.length; i += 3) {
+        pos[i] += Math.sin(t * 0.5 + i) * 0.0005;
       }
+      particles.geometry.attributes.position.needsUpdate = true;
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, w, h);
-      particles.forEach(p => { p.update(); p.draw(); });
-      drawConnections();
-      requestAnimationFrame(animate);
-    }
-    animate();
+    renderer.render(scene, camera);
+  }
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  /* ═══ HERO GSAP ═══ */
+  function setupHeroGSAP() {
+    if (typeof gsap === 'undefined') return;
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.from('.hero-label', { opacity: 0, y: 20, duration: 0.7 }, 0)
+      .from('.h-line', { y: '120%', opacity: 0, duration: 1, stagger: 0.12, ease: 'power4.out' }, 0.1)
+      .from('.hero-p', { opacity: 0, y: 20, duration: 0.6 }, 0.7)
+      .from('.scroll-hint', { opacity: 0, y: 15, duration: 0.5 }, 0.9);
   }
 
   /* ═══ NAV ═══ */
@@ -156,205 +480,133 @@
     const nav = document.getElementById('nav');
     if (!nav) return;
     window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 50);
+      nav.classList.toggle('scroll', window.scrollY > 50);
     }, { passive: true });
   }
 
-  /* ═══ MOBILE MENU ═══ */
+  /* ═══ MOBILE ═══ */
   function setupMobile() {
     const btn = document.getElementById('menuBtn');
-    const menu = document.getElementById('mobileMenu');
+    const menu = document.getElementById('mobMenu');
     if (!btn || !menu) return;
-
-    function toggle(open) {
-      menu.classList.toggle('open', open);
-      btn.classList.toggle('open', open);
-      btn.setAttribute('aria-expanded', open);
-      document.body.style.overflow = open ? 'hidden' : '';
+    function toggle(o) {
+      menu.classList.toggle('open', o);
+      btn.classList.toggle('open', o);
+      btn.setAttribute('aria-expanded', o);
+      document.body.style.overflow = o ? 'hidden' : '';
     }
-
     btn.addEventListener('click', () => toggle(!menu.classList.contains('open')));
     menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => toggle(false)));
   }
 
-  /* ═══ CUSTOM CURSOR ═══ */
+  /* ═══ CURSOR ═══ */
   function setupCursor() {
     if (window.matchMedia('(pointer:coarse)').matches || window.innerWidth <= 1024) return;
-
-    const dot = document.getElementById('cursorDot');
-    const ring = document.getElementById('cursorRing');
+    const dot = document.getElementById('curDot');
+    const ring = document.getElementById('curRing');
     if (!dot || !ring) return;
 
-    let mouseX = -100, mouseY = -100;
-    let ringX = -100, ringY = -100;
-
-    requestAnimationFrame(() => {
-      dot.style.opacity = '1';
-      ring.style.opacity = '1';
-    });
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    requestAnimationFrame(() => { dot.style.opacity = '1'; ring.style.opacity = '1'; });
 
     document.addEventListener('mousemove', e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.left = mouseX + 'px';
-      dot.style.top = mouseY + 'px';
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + 'px'; dot.style.top = my + 'px';
     });
 
-    function animateRing() {
-      ringX += (mouseX - ringX) * 0.1;
-      ringY += (mouseY - ringY) * 0.1;
-      ring.style.left = ringX + 'px';
-      ring.style.top = ringY + 'px';
-      requestAnimationFrame(animateRing);
-    }
-    animateRing();
+    (function moveRing() {
+      rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(moveRing);
+    })();
 
-    // Hover states
-    document.querySelectorAll('a, button, .svc-card, .project-card, .tech-item, .av, .ci').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        ring.classList.add('hover');
-        dot.classList.add('hover');
-      });
-      el.addEventListener('mouseleave', () => {
-        ring.classList.remove('hover');
-        dot.classList.remove('hover');
-      });
+    document.querySelectorAll('a,button,.svc,.proj,.val,.ci,.tech-item').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.classList.add('hov'); dot.classList.add('hov'); });
+      el.addEventListener('mouseleave', () => { ring.classList.remove('hov'); dot.classList.remove('hov'); });
     });
-
-    document.querySelectorAll('img, .pc-img, .about-img-wrap').forEach(el => {
-      el.addEventListener('mouseenter', () => ring.classList.add('expand'));
-      el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
+    document.querySelectorAll('img,.proj-img,.about-img').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('exp'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('exp'));
     });
-
     document.body.style.cursor = 'none';
-    document.querySelectorAll('a, button').forEach(el => el.style.cursor = 'none');
+    document.querySelectorAll('a,button').forEach(el => el.style.cursor = 'none');
   }
 
-  /* ═══ MAGNETIC BUTTONS ═══ */
+  /* ═══ MAGNETIC ═══ */
   function setupMagnetic() {
-    if (window.matchMedia('(pointer:coarse)').matches) return;
-    if (typeof gsap === 'undefined') return;
-
-    document.querySelectorAll('.btn, .nav-cta').forEach(btn => {
-      btn.addEventListener('mousemove', e => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        gsap.to(btn, { x: x * 0.2, y: y * 0.2, duration: 0.3, ease: 'power2.out' });
+    if (window.matchMedia('(pointer:coarse)').matches || typeof gsap === 'undefined') return;
+    document.querySelectorAll('.btn,.n-cta').forEach(b => {
+      b.addEventListener('mousemove', e => {
+        const r = b.getBoundingClientRect();
+        gsap.to(b, { x: (e.clientX - r.left - r.width/2) * 0.2, y: (e.clientY - r.top - r.height/2) * 0.2, duration: 0.3, ease: 'power2.out' });
       });
-      btn.addEventListener('mouseleave', () => {
-        gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-      });
+      b.addEventListener('mouseleave', () => gsap.to(b, { x:0, y:0, duration:0.6, ease:'elastic.out(1,0.4)' }));
     });
   }
 
   /* ═══ 3D TILT ═══ */
   function setup3DTilt() {
-    if (window.matchMedia('(pointer:coarse)').matches) return;
-    if (typeof gsap === 'undefined') return;
-
-    document.querySelectorAll('.svc-card, .project-card, .tech-item').forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        gsap.to(card, {
-          rotateY: x * 8, rotateX: -y * 8,
-          duration: 0.3, ease: 'power2.out',
-          transformPerspective: 800
-        });
+    if (window.matchMedia('(pointer:coarse)').matches || typeof gsap === 'undefined') return;
+    document.querySelectorAll('.svc,.proj').forEach(c => {
+      c.addEventListener('mousemove', e => {
+        const r = c.getBoundingClientRect();
+        const x = (e.clientX - r.left)/r.width - 0.5;
+        const y = (e.clientY - r.top)/r.height - 0.5;
+        gsap.to(c, { rotateY: x*8, rotateX: -y*8, duration:0.3, ease:'power2.out', transformPerspective:800 });
       });
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          rotateY: 0, rotateX: 0,
-          duration: 0.5, ease: 'power3.out'
-        });
-      });
+      c.addEventListener('mouseleave', () => gsap.to(c, { rotateY:0, rotateX:0, duration:0.5, ease:'power3.out' }));
     });
   }
 
-  /* ═══ HERO ANIMATIONS ═══ */
-  function setupHero() {
-    if (typeof gsap === 'undefined') return;
-
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-    tl.from('.hero-label', { opacity: 0, y: 20, duration: 0.7 }, 0)
-      .from('.ht-word', {
-        y: '110%', duration: 1.2,
-        stagger: 0.1,
-        ease: 'power4.out'
-      }, 0.1)
-      .from('.hero-sub', { opacity: 0, y: 30, duration: 0.8 }, 0.6)
-      .from('.hero-btns', { opacity: 0, y: 25, duration: 0.7 }, 0.8)
-      .from('.hero-stats', { opacity: 0, y: 20, duration: 0.6 }, 1);
-  }
-
-  /* ═══ COUNTER ANIMATION ═══ */
+  /* ═══ COUNTERS ═══ */
   function setupCounters() {
-    const nums = document.querySelectorAll('.hs-num[data-count]');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          const target = parseInt(el.dataset.count);
-          animateCount(el, target);
-          observer.unobserve(el);
+    const nums = document.querySelectorAll('[data-count]');
+    const obs = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          const tgt = parseInt(el.dataset.count);
+          const dur = 2000; const st = performance.now();
+          const pct = el.nextElementSibling?.textContent?.includes('%');
+          (function tick(now) {
+            const p = Math.min((now - st) / dur, 1);
+            const eased = 1 - Math.pow(1-p, 3);
+            el.textContent = Math.round(tgt * eased) + (pct ? '' : '+');
+            if (p < 1) requestAnimationFrame(tick);
+          })(st);
+          obs.unobserve(el);
         }
       });
     }, { threshold: 0.5 });
-
-    nums.forEach(n => observer.observe(n));
-
-    function animateCount(el, target) {
-      const duration = 2000;
-      const start = performance.now();
-      const isPercent = el.nextElementSibling?.textContent?.includes('%');
-
-      function tick(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        // Ease out
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(target * eased);
-        el.textContent = current + (isPercent ? '' : '+');
-        if (progress < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
+    nums.forEach(n => obs.observe(n));
   }
 
-  /* ═══ SCROLL REVEALS (IntersectionObserver) ═══ */
+  /* ═══ SCROLL REVEALS ═══ */
   function setupScrollReveals() {
-    const revealEls = document.querySelectorAll('.reveal');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          const delay = parseInt(el.dataset.revealDelay || '0');
-          setTimeout(() => el.classList.add('revealed'), delay);
-          observer.unobserve(el);
-        }
-      });
-    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-
-    // Auto-detect stagger groups
+    const els = document.querySelectorAll('.reveal');
     const staggerGroups = [
-      { sel: '.svc-card', stagger: 100 },
-      { sel: '.tech-item', stagger: 80 },
-      { sel: '.project-card', stagger: 120 },
+      { sel: '.svc', stagger: 100 },
+      { sel: '.proj', stagger: 120 },
+      { sel: '.val', stagger: 80 },
       { sel: '.ci', stagger: 80 },
-      { sel: '.av', stagger: 80 },
+      { sel: '.stat', stagger: 100 },
     ];
-
     staggerGroups.forEach(({ sel, stagger }) => {
       document.querySelectorAll(sel).forEach((el, i) => {
         el.dataset.revealDelay = String(i * stagger);
       });
     });
 
-    revealEls.forEach(el => observer.observe(el));
+    const obs = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (e.isIntersecting) {
+          const delay = parseInt(e.target.dataset.revealDelay || '0');
+          setTimeout(() => e.target.classList.add('vis'), delay);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    els.forEach(el => obs.observe(el));
   }
 
   /* ═══ SMOOTH ANCHORS ═══ */
@@ -367,8 +619,7 @@
         if (target) {
           e.preventDefault();
           const navH = document.getElementById('nav')?.offsetHeight || 0;
-          const pos = target.getBoundingClientRect().top + window.scrollY - navH - 20;
-          window.scrollTo({ top: pos, behavior: 'smooth' });
+          window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - navH - 20, behavior: 'smooth' });
         }
       });
     });

@@ -1,450 +1,290 @@
 <!DOCTYPE html>
-<html lang="es" dir="ltr">
+<html lang="es">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>WebTuria — Agencia Digital Premium · Valencia</title>
-  <meta name="description" content="WebTuria: agencia digital premium de Valencia. Creamos webs espectaculares, automatizamos procesos y hacemos crecer tu negocio con IA, diseño 3D y tecnología de vanguardia."/>
-  <meta name="keywords" content="agencia digital valencia, diseño web premium, desarrollo web, IA para empresas, automatización, branding digital"/>
-  <meta name="author" content="WebTuria"/>
-  <meta name="robots" content="index, follow"/>
+  <meta name="description" content="WebTuria: creamos experiencias digitales inmersivas que transforman negocios. Diseño web 3D, IA y automatización desde Valencia."/>
   <meta name="theme-color" content="#0A0A0F"/>
-  <link rel="canonical" href="https://webturia.com/"/>
 
-  <meta property="og:type" content="website"/>
-  <meta property="og:title" content="WebTuria — Agencia Digital Premium"/>
-  <meta property="og:description" content="Creamos experiencias digitales que transforman negocios. Valencia, España."/>
-  <meta property="og:url" content="https://webturia.com/"/>
-  <meta property="og:locale" content="es_ES"/>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 
   <!-- ═══ PRELOADER ═══ -->
-  <div class="preloader" id="preloader" aria-hidden="true">
-    <div class="preloader-inner">
-      <div class="preloader-orb"></div>
-      <div class="preloader-brand">WebTuria</div>
-      <div class="preloader-tagline">Creando el futuro digital</div>
-      <div class="preloader-bar"><div class="preloader-fill"></div></div>
+  <div id="preloader" aria-hidden="true">
+    <div class="pl-inner">
+      <div class="pl-orb"></div>
+      <div class="pl-brand">WebTuria</div>
+      <div class="pl-sub">Entrando al estudio</div>
+      <div class="pl-bar"><div class="pl-fill"></div></div>
     </div>
   </div>
 
   <!-- ═══ CURSOR ═══ -->
-  <div class="cursor-dot" id="cursorDot"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cur-dot" id="curDot"></div>
+  <div class="cur-ring" id="curRing"></div>
 
-  <!-- ═══ CANVAS BACKGROUND ═══ -->
-  <canvas id="bgCanvas"></canvas>
+  <!-- ═══ THREE.JS CANVAS (The 3D desk scene) ═══ -->
+  <canvas id="scene3d"></canvas>
 
   <!-- ═══ NAV ═══ -->
   <header id="nav">
-    <div class="nav-inner">
-      <a href="#" class="nav-brand" aria-label="Inicio">
-        <span class="brand-w">W</span><span class="brand-rest">ebTuria</span>
-      </a>
-      <nav class="nav-links" aria-label="Navegación principal">
+    <div class="nav-in">
+      <a href="#" class="n-brand"><span class="n-w">W</span>ebTuria</a>
+      <nav class="n-links">
         <a href="#servicios">Servicios</a>
         <a href="#proyectos">Proyectos</a>
         <a href="#nosotros">Nosotros</a>
         <a href="#contacto">Contacto</a>
       </nav>
-      <a href="#contacto" class="nav-cta" id="nav-contact-btn">
-        <span>Hablemos</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
-      <button id="menuBtn" class="menu-btn" aria-label="Menú" aria-expanded="false">
+      <a href="#contacto" class="n-cta">Hablemos <span>→</span></a>
+      <button id="menuBtn" class="n-menu" aria-label="Menú" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
   <!-- ═══ MOBILE MENU ═══ -->
-  <div id="mobileMenu" class="mobile-menu" role="dialog">
-    <nav class="mm-nav">
-      <a href="#servicios" class="mm-link">Servicios</a>
-      <a href="#proyectos" class="mm-link">Proyectos</a>
-      <a href="#nosotros" class="mm-link">Nosotros</a>
-      <a href="#contacto" class="mm-link">Contacto</a>
+  <div id="mobMenu" class="mob-menu">
+    <nav>
+      <a href="#servicios">Servicios</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#contacto">Contacto</a>
     </nav>
-    <a href="#contacto" class="mm-cta">Hablemos →</a>
+    <a href="#contacto" class="mob-cta">Hablemos →</a>
   </div>
 
-  <main>
-    <!-- ═══ HERO ═══ -->
+  <!-- ═══ SCROLL CONTAINER — drives the 3D camera ═══ -->
+  <div id="scroll-driver">
+
+    <!-- PHASE 1: HERO TEXT (visible 0-25% scroll) -->
     <section id="hero">
-      <div class="hero-content">
-        <div class="hero-label reveal">
-          <span class="hl-dot"></span>
-          <span>Agencia Digital Premium · Valencia</span>
-        </div>
-        <h1 class="hero-title">
-          <span class="ht-line reveal"><span class="ht-word">Creamos</span></span>
-          <span class="ht-line reveal"><span class="ht-word">experiencias</span></span>
-          <span class="ht-line reveal"><span class="ht-word ht-gradient">digitales</span></span>
+      <div class="hero-in">
+        <p class="hero-label"><span class="h-dot"></span> Agencia Digital Premium · Valencia</p>
+        <h1>
+          <span class="h-line">Creamos</span>
+          <span class="h-line">experiencias</span>
+          <span class="h-line h-grad">inmersivas</span>
         </h1>
-        <p class="hero-sub reveal">Diseño web inmersivo, automatización con IA y estrategia digital que transforma negocios desde Valencia al mundo.</p>
-        <div class="hero-btns reveal">
-          <a href="#contacto" class="btn btn-glow" id="hero-cta">
-            <span>Empezar Proyecto</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-          <a href="#proyectos" class="btn btn-ghost" id="hero-portfolio">Ver Portfolio</a>
-        </div>
-        <div class="hero-stats reveal">
-          <div class="hs-item">
-            <strong class="hs-num" data-count="50">0</strong>
-            <span>Proyectos</span>
-          </div>
-          <div class="hs-sep"></div>
-          <div class="hs-item">
-            <strong class="hs-num" data-count="98">0</strong>
-            <span>% Satisfacción</span>
-          </div>
-          <div class="hs-sep"></div>
-          <div class="hs-item">
-            <strong class="hs-num" data-count="5">0</strong>
-            <span>Años</span>
-          </div>
-        </div>
-      </div>
-      <div class="hero-scroll-hint">
-        <div class="scroll-mouse">
-          <div class="scroll-dot"></div>
-        </div>
-        <span>Scroll</span>
-      </div>
-    </section>
-
-    <!-- ═══ MARQUEE ═══ -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span>Diseño Web</span><span class="mdot">◆</span>
-        <span>Branding</span><span class="mdot">◆</span>
-        <span>Automatización IA</span><span class="mdot">◆</span>
-        <span>E-commerce</span><span class="mdot">◆</span>
-        <span>SEO</span><span class="mdot">◆</span>
-        <span>Apps Móvil</span><span class="mdot">◆</span>
-        <span>3D & Motion</span><span class="mdot">◆</span>
-        <span>WhatsApp Bots</span><span class="mdot">◆</span>
-        <span>Diseño Web</span><span class="mdot">◆</span>
-        <span>Branding</span><span class="mdot">◆</span>
-        <span>Automatización IA</span><span class="mdot">◆</span>
-        <span>E-commerce</span><span class="mdot">◆</span>
-        <span>SEO</span><span class="mdot">◆</span>
-        <span>Apps Móvil</span><span class="mdot">◆</span>
-        <span>3D & Motion</span><span class="mdot">◆</span>
-        <span>WhatsApp Bots</span><span class="mdot">◆</span>
-      </div>
-    </div>
-
-    <!-- ═══ SERVICIOS ═══ -->
-    <section id="servicios" class="sec">
-      <div class="contain">
-        <div class="sec-header reveal">
-          <span class="sec-label">Servicios</span>
-          <h2 class="sec-title">Lo que<br/><span class="gradient-text">hacemos mejor</span></h2>
-          <p class="sec-desc">Combinamos diseño, tecnología e inteligencia artificial para crear soluciones digitales que no solo se ven espectaculares — funcionan.</p>
-        </div>
-
-        <div class="svc-grid">
-          <article class="svc-card reveal" id="svc-web">
-            <div class="svc-num">01</div>
-            <div class="svc-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            </div>
-            <h3>Diseño Web Premium</h3>
-            <p>Webs inmersivas con animaciones 3D, scroll-driven effects y experiencias que dejan huella. Cada pixel cuenta.</p>
-            <div class="svc-tags">
-              <span>React</span><span>Three.js</span><span>GSAP</span>
-            </div>
-          </article>
-
-          <article class="svc-card reveal" id="svc-ia">
-            <div class="svc-num">02</div>
-            <div class="svc-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M16 14H8a4 4 0 00-4 4v2h16v-2a4 4 0 00-4-4z"/><circle cx="12" cy="6" r="1" fill="currentColor"/></svg>
-            </div>
-            <h3>Automatización con IA</h3>
-            <p>Chatbots WhatsApp, generación de contenido, flujos automatizados con n8n, y agentes IA que trabajan por ti 24/7.</p>
-            <div class="svc-tags">
-              <span>Gemini</span><span>n8n</span><span>WhatsApp</span>
-            </div>
-          </article>
-
-          <article class="svc-card reveal" id="svc-brand">
-            <div class="svc-num">03</div>
-            <div class="svc-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-            </div>
-            <h3>Branding & Estrategia</h3>
-            <p>Identidad visual completa, estrategia de marca, dirección de arte y sistemas de diseño escalables.</p>
-            <div class="svc-tags">
-              <span>Figma</span><span>Motion</span><span>Brand</span>
-            </div>
-          </article>
-
-          <article class="svc-card reveal" id="svc-growth">
-            <div class="svc-num">04</div>
-            <div class="svc-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            </div>
-            <h3>Growth & Performance</h3>
-            <p>SEO técnico, campañas PPC, analítica avanzada y optimización de conversiones. Hacemos que tu inversión rinda.</p>
-            <div class="svc-tags">
-              <span>SEO</span><span>Analytics</span><span>CRO</span>
-            </div>
-          </article>
+        <p class="hero-p">Scroll para entrar en nuestro estudio</p>
+        <div class="scroll-hint">
+          <div class="sh-mouse"><div class="sh-dot"></div></div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ HIGHLIGHT SECTION ═══ -->
-    <section class="sec-highlight">
-      <div class="highlight-inner">
-        <div class="highlight-bg">
-          <img src="img/hero.png" alt="" loading="lazy"/>
+    <!-- PHASE 2: 3D ZOOM SPACER (25-75% scroll — camera flies toward monitor) -->
+    <div id="zoom-spacer" aria-hidden="true"></div>
+
+    <!-- PHASE 3: TRANSITION FLASH -->
+    <div id="flash-overlay"></div>
+
+    <!-- PHASE 4: INSIDE THE SCREEN — real content -->
+    <div id="content" class="content-area">
+
+      <!-- Welcome banner (as if we just entered the screen) -->
+      <section class="welcome-sec">
+        <div class="contain">
+          <div class="welcome-glitch" aria-hidden="true">BIENVENIDO</div>
+          <h2 class="welcome-title reveal">Estás dentro de<br/><span class="grad">nuestro universo</span></h2>
+          <p class="welcome-sub reveal">Has cruzado la pantalla. Ahora descubre lo que podemos crear juntos.</p>
+          <div class="welcome-line"></div>
         </div>
-        <div class="highlight-content reveal">
-          <span class="sec-label">Tecnología</span>
-          <h2 class="highlight-title">Construimos con las<br/><span class="gradient-text">mejores herramientas</span></h2>
-          <div class="tech-grid">
-            <div class="tech-item reveal">
-              <div class="ti-icon">⚡</div>
-              <strong>Next.js & React</strong>
-              <span>Desarrollo frontend</span>
+      </section>
+
+      <!-- SERVICIOS -->
+      <section id="servicios" class="sec">
+        <div class="contain">
+          <div class="sec-head reveal">
+            <span class="label">Servicios</span>
+            <h2>Lo que hacemos<br/><span class="grad">mejor que nadie</span></h2>
+          </div>
+          <div class="svc-grid">
+            <article class="svc reveal" id="s1">
+              <div class="s-n">01</div>
+              <div class="s-ico">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <h3>Diseño Web Inmersivo</h3>
+              <p>Webs con 3D, scroll-driven effects y experiencias que nadie olvida. Como esta que estás viendo ahora.</p>
+              <div class="s-tags"><span>Three.js</span><span>GSAP</span><span>WebGL</span></div>
+            </article>
+            <article class="svc reveal" id="s2">
+              <div class="s-n">02</div>
+              <div class="s-ico">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <h3>Automatización con IA</h3>
+              <p>Chatbots WhatsApp, agentes IA con Gemini, flujos n8n. Automatizamos todo lo que se pueda automatizar.</p>
+              <div class="s-tags"><span>Gemini</span><span>n8n</span><span>WhatsApp</span></div>
+            </article>
+            <article class="svc reveal" id="s3">
+              <div class="s-n">03</div>
+              <div class="s-ico">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3>Branding Digital</h3>
+              <p>Identidad visual, dirección de arte y sistemas de diseño. Tu marca, elevada a otro nivel.</p>
+              <div class="s-tags"><span>Figma</span><span>Motion</span><span>Brand</span></div>
+            </article>
+            <article class="svc reveal" id="s4">
+              <div class="s-n">04</div>
+              <div class="s-ico">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <h3>Growth & Performance</h3>
+              <p>SEO técnico, campañas, analítica y optimización de conversión. Resultados medibles, no humo.</p>
+              <div class="s-tags"><span>SEO</span><span>Analytics</span><span>CRO</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS BAND -->
+      <section class="stats-band">
+        <div class="contain">
+          <div class="stat reveal"><strong data-count="50">0</strong><span>Proyectos</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat reveal"><strong data-count="98">0</strong><span>% Satisfacción</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat reveal"><strong data-count="5">0</strong><span>Años</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat reveal"><strong data-count="24">0</strong><span>/7 Soporte</span></div>
+        </div>
+      </section>
+
+      <!-- PROYECTOS -->
+      <section id="proyectos" class="sec">
+        <div class="contain">
+          <div class="sec-head reveal">
+            <span class="label">Portfolio</span>
+            <h2>Proyectos que<br/><span class="grad">hablan solos</span></h2>
+          </div>
+          <div class="proj-grid">
+            <article class="proj reveal">
+              <div class="proj-img"><img src="img/about.png" alt="Clínica Dental" loading="lazy"/><div class="proj-ov"><span>Web Design</span></div></div>
+              <div class="proj-info">
+                <h3>Clínica Dental MHG</h3>
+                <p>Web premium con animaciones 3D y conversión +340%.</p>
+                <div class="proj-tags"><span>HTML/CSS</span><span>GSAP</span><span>Docker</span></div>
+              </div>
+            </article>
+            <article class="proj reveal">
+              <div class="proj-img"><img src="img/services.png" alt="Lead Management" loading="lazy"/><div class="proj-ov"><span>IA & Automatización</span></div></div>
+              <div class="proj-info">
+                <h3>Lead Management Platform</h3>
+                <p>Plataforma con IA, WhatsApp bots y generación automática de webs.</p>
+                <div class="proj-tags"><span>Next.js</span><span>Prisma</span><span>Gemini</span></div>
+              </div>
+            </article>
+            <article class="proj proj-wide reveal">
+              <div class="proj-img"><img src="img/hero.png" alt="E-commerce" loading="lazy"/><div class="proj-ov"><span>E-commerce</span></div></div>
+              <div class="proj-info">
+                <h3>E-commerce Inmersivo</h3>
+                <p>Tienda online con experiencia de compra 3D y dashboard en tiempo real.</p>
+                <div class="proj-tags"><span>React</span><span>Stripe</span><span>Node.js</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOSOTROS -->
+      <section id="nosotros" class="sec">
+        <div class="contain">
+          <div class="about-grid">
+            <div class="about-vis reveal">
+              <div class="about-img"><img src="img/about.png" alt="Equipo" loading="lazy"/></div>
+              <div class="about-badge"><strong>+50</strong><span>Proyectos</span></div>
             </div>
-            <div class="tech-item reveal">
-              <div class="ti-icon">🧠</div>
-              <strong>Gemini & GPT</strong>
-              <span>Inteligencia artificial</span>
-            </div>
-            <div class="tech-item reveal">
-              <div class="ti-icon">🔄</div>
-              <strong>n8n & Zapier</strong>
-              <span>Automatización</span>
-            </div>
-            <div class="tech-item reveal">
-              <div class="ti-icon">🎨</div>
-              <strong>Three.js & GSAP</strong>
-              <span>Animaciones 3D</span>
-            </div>
-            <div class="tech-item reveal">
-              <div class="ti-icon">📱</div>
-              <strong>React Native</strong>
-              <span>Apps móviles</span>
-            </div>
-            <div class="tech-item reveal">
-              <div class="ti-icon">☁️</div>
-              <strong>Railway & AWS</strong>
-              <span>Cloud & Deploy</span>
+            <div class="about-txt">
+              <span class="label reveal">Nosotros</span>
+              <h2 class="reveal">Somos los que<br/><span class="grad">no siguen reglas</span></h2>
+              <p class="reveal">Diseñadores, developers y estrategas digitales de Valencia. Obsesionados con crear lo que nadie ha visto.</p>
+              <p class="reveal">No hacemos plantillas. No seguimos tendencias. Las <strong>creamos</strong>.</p>
+              <div class="vals">
+                <div class="val reveal"><span class="v-n">01</span><div><strong>Diseño Obsesivo</strong><br/><small>Cada pixel cuenta</small></div></div>
+                <div class="val reveal"><span class="v-n">02</span><div><strong>Tecnología Punta</strong><br/><small>Siempre en la vanguardia</small></div></div>
+                <div class="val reveal"><span class="v-n">03</span><div><strong>Resultados Reales</strong><br/><small>Métricas, no promesas</small></div></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ═══ PROYECTOS ═══ -->
-    <section id="proyectos" class="sec">
-      <div class="contain">
-        <div class="sec-header reveal">
-          <span class="sec-label">Portfolio</span>
-          <h2 class="sec-title">Proyectos que<br/><span class="gradient-text">hablan por sí solos</span></h2>
-        </div>
-
-        <div class="projects-grid">
-          <article class="project-card reveal" id="proj-1">
-            <div class="pc-img">
-              <img src="img/about.png" alt="Proyecto de diseño web" loading="lazy"/>
-              <div class="pc-overlay">
-                <span class="pc-cat">Web Design</span>
-              </div>
-            </div>
-            <div class="pc-info">
-              <h3>Clínica Dental MHG</h3>
-              <p>Web premium con animaciones 3D, SEO perfecto y conversión del 340% más que la anterior.</p>
-              <div class="pc-tags">
-                <span>HTML/CSS</span><span>GSAP</span><span>Docker</span>
-              </div>
-            </div>
-          </article>
-
-          <article class="project-card reveal" id="proj-2">
-            <div class="pc-img">
-              <img src="img/services.png" alt="Automatización IA" loading="lazy"/>
-              <div class="pc-overlay">
-                <span class="pc-cat">IA & Automatización</span>
-              </div>
-            </div>
-            <div class="pc-info">
-              <h3>Lead Management Platform</h3>
-              <p>Plataforma completa de gestión de leads con IA, WhatsApp bots y generación automática de webs.</p>
-              <div class="pc-tags">
-                <span>Next.js</span><span>Prisma</span><span>Gemini</span>
-              </div>
-            </div>
-          </article>
-
-          <article class="project-card pc-wide reveal" id="proj-3">
-            <div class="pc-img">
-              <img src="img/hero.png" alt="E-commerce" loading="lazy"/>
-              <div class="pc-overlay">
-                <span class="pc-cat">E-commerce</span>
-              </div>
-            </div>
-            <div class="pc-info">
-              <h3>Plataforma E-commerce Custom</h3>
-              <p>Tienda online con experiencia de compra inmersiva, pagos integrados y dashboard de gestión en tiempo real.</p>
-              <div class="pc-tags">
-                <span>React</span><span>Stripe</span><span>Node.js</span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ NOSOTROS ═══ -->
-    <section id="nosotros" class="sec">
-      <div class="contain">
-        <div class="about-layout">
-          <div class="about-visual reveal">
-            <div class="about-img-wrap">
-              <img src="img/about.png" alt="Equipo WebTuria" loading="lazy"/>
-            </div>
-            <div class="about-float-card">
-              <strong>+50</strong>
-              <span>Proyectos entregados</span>
-            </div>
-          </div>
-          <div class="about-text">
-            <span class="sec-label reveal">Nosotros</span>
-            <h2 class="sec-title reveal">No somos una agencia<br/><span class="gradient-text">cualquiera</span></h2>
-            <p class="reveal">Somos un equipo de diseñadores, desarrolladores y estrategas digitales basados en Valencia. Nacimos con una obsesión: crear experiencias digitales que la gente recuerde.</p>
-            <p class="reveal">Cada proyecto es un reto. No hacemos plantillas. No hacemos lo fácil. Hacemos lo que parece <strong>imposible</strong> — y luego lo superamos.</p>
-            <div class="about-values">
-              <div class="av reveal">
-                <div class="av-num">01</div>
-                <div><strong>Diseño Obsesivo</strong><br/><span>Cada pixel tiene propósito</span></div>
-              </div>
-              <div class="av reveal">
-                <div class="av-num">02</div>
-                <div><strong>Tecnología Punta</strong><br/><span>Siempre en la vanguardia</span></div>
-              </div>
-              <div class="av reveal">
-                <div class="av-num">03</div>
-                <div><strong>Resultados Reales</strong><br/><span>Métricas, no promesas</span></div>
-              </div>
+      <!-- CTA -->
+      <section class="sec-cta">
+        <div class="cta-bg" aria-hidden="true">HABLEMOS</div>
+        <div class="contain">
+          <div class="cta-in reveal">
+            <h2>¿Listo para crear<br/><span class="grad">lo imposible</span>?</h2>
+            <p>La primera consulta es gratis y prometemos dejarte con la boca abierta.</p>
+            <div class="cta-btns">
+              <a href="mailto:hola@webturia.com" class="btn btn-glow">hola@webturia.com</a>
+              <a href="https://wa.me/34600000000" target="_blank" rel="noopener" class="btn btn-ghost">WhatsApp →</a>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ═══ CTA ═══ -->
-    <section class="sec-cta">
-      <div class="cta-bg-text" aria-hidden="true">HABLEMOS</div>
-      <div class="contain">
-        <div class="cta-content reveal">
-          <h2>¿Listo para crear algo<br/><span class="gradient-text">extraordinario</span>?</h2>
-          <p>Cuéntanos tu idea. La primera consulta es gratis — y prometemos que te sorprenderemos.</p>
-          <div class="cta-btns">
-            <a href="mailto:hola@webturia.com" class="btn btn-glow" id="cta-email">
-              <span>hola@webturia.com</span>
-            </a>
-            <a href="https://wa.me/34600000000" target="_blank" rel="noopener" class="btn btn-ghost" id="cta-wa">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-              <span>WhatsApp</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ CONTACTO ═══ -->
-    <section id="contacto" class="sec">
-      <div class="contain">
-        <div class="contact-layout">
-          <div class="contact-info">
-            <span class="sec-label reveal">Contacto</span>
-            <h2 class="sec-title reveal">Conecta<br/><span class="gradient-text">con nosotros</span></h2>
-            <div class="contact-items">
-              <a href="mailto:hola@webturia.com" class="ci reveal">
-                <div class="ci-icon">✉️</div>
-                <div><small>Email</small><strong>hola@webturia.com</strong></div>
-              </a>
-              <a href="tel:+34600000000" class="ci reveal">
-                <div class="ci-icon">📞</div>
-                <div><small>Teléfono</small><strong>+34 600 000 000</strong></div>
-              </a>
-              <div class="ci reveal">
-                <div class="ci-icon">📍</div>
-                <div><small>Ubicación</small><strong>Valencia, España</strong></div>
-              </div>
-              <div class="ci reveal">
-                <div class="ci-icon">🌐</div>
-                <div><small>Disponibilidad</small><strong>Remoto · Mundial</strong></div>
+      <!-- CONTACTO -->
+      <section id="contacto" class="sec">
+        <div class="contain">
+          <div class="contact-grid">
+            <div class="contact-left">
+              <span class="label reveal">Contacto</span>
+              <h2 class="reveal">Conecta<br/><span class="grad">con nosotros</span></h2>
+              <div class="ci-list">
+                <a href="mailto:hola@webturia.com" class="ci reveal"><span class="ci-i">✉️</span><div><small>Email</small><strong>hola@webturia.com</strong></div></a>
+                <a href="tel:+34600000000" class="ci reveal"><span class="ci-i">📞</span><div><small>Teléfono</small><strong>+34 600 000 000</strong></div></a>
+                <div class="ci reveal"><span class="ci-i">📍</span><div><small>Ubicación</small><strong>Valencia, España</strong></div></div>
               </div>
             </div>
-          </div>
-          <div class="contact-form-wrap reveal">
-            <form class="contact-form" id="contactForm" onsubmit="return false">
-              <div class="cf-group">
-                <label for="cf-name">Nombre</label>
-                <input type="text" id="cf-name" placeholder="Tu nombre" required/>
-              </div>
-              <div class="cf-group">
-                <label for="cf-email">Email</label>
-                <input type="email" id="cf-email" placeholder="tu@email.com" required/>
-              </div>
-              <div class="cf-group">
-                <label for="cf-project">Cuéntanos tu proyecto</label>
-                <textarea id="cf-project" rows="4" placeholder="Describe tu idea..."></textarea>
-              </div>
-              <button type="submit" class="btn btn-glow btn-full">
-                <span>Enviar Mensaje</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </button>
-            </form>
+            <div class="contact-right reveal">
+              <form id="cf" onsubmit="return false">
+                <div class="fg"><label for="fn">Nombre</label><input type="text" id="fn" placeholder="Tu nombre" required/></div>
+                <div class="fg"><label for="fe">Email</label><input type="email" id="fe" placeholder="tu@email.com" required/></div>
+                <div class="fg"><label for="fm">Mensaje</label><textarea id="fm" rows="4" placeholder="Cuéntanos tu idea..."></textarea></div>
+                <button type="submit" class="btn btn-glow btn-full">Enviar →</button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <!-- ═══ FOOTER ═══ -->
-  <footer>
-    <div class="contain">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <span class="brand-w">W</span><span class="brand-rest">ebTuria</span>
+      <!-- FOOTER -->
+      <footer>
+        <div class="contain">
+          <div class="ft-top">
+            <span class="ft-brand"><span class="n-w">W</span>ebTuria</span>
+            <nav class="ft-links">
+              <a href="#servicios">Servicios</a>
+              <a href="#proyectos">Proyectos</a>
+              <a href="#nosotros">Nosotros</a>
+              <a href="#contacto">Contacto</a>
+            </nav>
+          </div>
+          <div class="ft-bot">
+            <p>© 2026 WebTuria. Hecho con obsesión en Valencia.</p>
+            <div class="ft-soc">
+              <a href="#">IG</a><a href="#">IN</a><a href="#">X</a>
+            </div>
+          </div>
         </div>
-        <nav class="footer-links">
-          <a href="#servicios">Servicios</a>
-          <a href="#proyectos">Proyectos</a>
-          <a href="#nosotros">Nosotros</a>
-          <a href="#contacto">Contacto</a>
-        </nav>
-      </div>
-      <div class="footer-bottom">
-        <p>© 2026 WebTuria. Hecho con obsesión en Valencia.</p>
-        <div class="footer-socials">
-          <a href="#" aria-label="Instagram">IG</a>
-          <a href="#" aria-label="LinkedIn">IN</a>
-          <a href="#" aria-label="Twitter">X</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+      </footer>
+
+    </div><!-- /#content -->
+  </div><!-- /#scroll-driver -->
 
   <!-- Libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
