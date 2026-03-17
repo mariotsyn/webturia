@@ -114,21 +114,28 @@
 
   /* ─── DESK ─── */
   function createDesk() {
-    // Desk surface
+    // Desk surface — warm dark walnut / charcoal
     const deskGeo = new THREE.BoxGeometry(5, 0.08, 2.5);
     const deskMat = new THREE.MeshStandardMaterial({
-      color: 0x111122,
-      metalness: 0.6,
-      roughness: 0.4,
+      color: 0x1C1410,
+      metalness: 0.3,
+      roughness: 0.65,
     });
     const deskMesh = new THREE.Mesh(deskGeo, deskMat);
     deskMesh.position.set(0, 0.7, 0);
     scene.add(deskMesh);
     desk.surface = deskMesh;
 
-    // Desk legs
+    // Desk edge accent (subtle light strip on front edge)
+    const edgeGeo = new THREE.BoxGeometry(5, 0.005, 0.02);
+    const edgeMat = new THREE.MeshBasicMaterial({ color: 0x6366F1, transparent: true, opacity: 0.3 });
+    const edge = new THREE.Mesh(edgeGeo, edgeMat);
+    edge.position.set(0, 0.74, 1.25);
+    scene.add(edge);
+
+    // Desk legs — brushed chrome
     const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.7, 8);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x0A0A12, metalness: 0.8, roughness: 0.3 });
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x3A3A42, metalness: 0.9, roughness: 0.15 });
     const legPositions = [[-2.2, 0.35, -1], [2.2, 0.35, -1], [-2.2, 0.35, 1], [2.2, 0.35, 1]];
     legPositions.forEach(p => {
       const leg = new THREE.Mesh(legGeo, legMat);
@@ -142,9 +149,9 @@
     // Monitor body (thin box)
     const bodyGeo = new THREE.BoxGeometry(3, 1.8, 0.1);
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x111122,
-      metalness: 0.7,
-      roughness: 0.3,
+      color: 0x0D0D14,
+      metalness: 0.85,
+      roughness: 0.18,
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.set(0, 1.64, -0.35);
@@ -283,7 +290,7 @@
 
     // Monitor stand — placed BEHIND the monitor body
     const standGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
-    const standMat = new THREE.MeshStandardMaterial({ color: 0x0A0A12, metalness: 0.8, roughness: 0.2 });
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x2A2A32, metalness: 0.9, roughness: 0.12 });
     const stand = new THREE.Mesh(standGeo, standMat);
     stand.position.set(0, 0.98, -0.55);
     scene.add(stand);
@@ -299,18 +306,25 @@
   function createKeyboard() {
     const kbGroup = new THREE.Group();
 
-    // Main body
+    // Main body — sleek dark aluminum
     const kbGeo = new THREE.BoxGeometry(1.4, 0.04, 0.5);
     const kbMat = new THREE.MeshStandardMaterial({
-      color: 0x111122, metalness: 0.6, roughness: 0.4,
+      color: 0x18181F, metalness: 0.75, roughness: 0.25,
     });
     const kb = new THREE.Mesh(kbGeo, kbMat);
     kbGroup.add(kb);
 
-    // Individual keys (subtle grid)
+    // RGB underglow on keyboard base
+    const glowGeo = new THREE.BoxGeometry(1.38, 0.005, 0.48);
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0x6366F1, transparent: true, opacity: 0.15 });
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    glow.position.y = -0.025;
+    kbGroup.add(glow);
+
+    // Individual keys — dark caps with subtle lighter edges
     const keyGeo = new THREE.BoxGeometry(0.08, 0.025, 0.08);
     const keyMat = new THREE.MeshStandardMaterial({
-      color: 0x1A1A2E, metalness: 0.5, roughness: 0.5,
+      color: 0x222230, metalness: 0.6, roughness: 0.4,
     });
 
     for (let row = 0; row < 4; row++) {
@@ -325,25 +339,31 @@
     scene.add(kbGroup);
     desk.keyboard = kbGroup;
 
-    // Mouse
+    // Mouse — matching dark aluminum
     const mouseGeo = new THREE.BoxGeometry(0.18, 0.04, 0.3);
     const mouseMat = new THREE.MeshStandardMaterial({
-      color: 0x111122, metalness: 0.6, roughness: 0.4,
+      color: 0x18181F, metalness: 0.75, roughness: 0.25,
     });
     const mouseMesh = new THREE.Mesh(mouseGeo, mouseMat);
     mouseMesh.position.set(1.2, 0.74, 0.55);
-    // Round the mouse a bit
     scene.add(mouseMesh);
     desk.mouse = mouseMesh;
 
-    // Coffee mug
+    // Coffee mug — frosted ceramic with accent ring
     const mugGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.22, 16);
     const mugMat = new THREE.MeshStandardMaterial({
-      color: 0x1A1A2E, metalness: 0.3, roughness: 0.6,
+      color: 0xE8E4DF, metalness: 0.05, roughness: 0.85,
     });
     const mug = new THREE.Mesh(mugGeo, mugMat);
     mug.position.set(-1.8, 0.85, 0.4);
     scene.add(mug);
+    // Mug accent ring
+    const ringGeo = new THREE.TorusGeometry(0.115, 0.012, 8, 24);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.6 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(-1.8, 0.92, 0.4);
+    scene.add(ring);
     desk.mug = mug;
   }
 

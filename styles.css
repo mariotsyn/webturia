@@ -45,12 +45,13 @@ a{color:inherit;text-decoration:none}
 }
 #preloader.done{opacity:0;visibility:hidden;pointer-events:none}
 .pl-inner{text-align:center}
-.pl-orb{
-  width:70px;height:70px;margin:0 auto 1.5rem;
-  border-radius:50%;background:var(--grad);
+.pl-logo{
+  width:100px;height:100px;margin:0 auto 1.5rem;
+  border-radius:50%;
   animation:orbP 2s ease infinite;
+  filter:drop-shadow(0 0 20px rgba(99,102,241,.3));
 }
-@keyframes orbP{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(99,102,241,.3)}50%{transform:scale(1.15);box-shadow:0 0 80px rgba(99,102,241,.5)}}
+@keyframes orbP{0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(99,102,241,.3))}50%{transform:scale(1.08);filter:drop-shadow(0 0 40px rgba(99,102,241,.5))}}
 .pl-brand{font-family:var(--font);font-size:1.8rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .pl-sub{font-size:.7rem;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:.4rem 0 1.5rem}
 .pl-bar{width:180px;height:2px;background:var(--border);border-radius:4px;margin:0 auto;overflow:hidden}
