@@ -334,14 +334,13 @@
 
     // Mouse — rounded capsule shape, lighter color
     const mouseGroup = new THREE.Group();
-    // Mouse body (rounded)
-    const mouseBodyGeo = new THREE.CapsuleGeometry(0.06, 0.12, 4, 12);
+    // Mouse body (rounded using scaled sphere — r128 compat)
+    const mouseBodyGeo = new THREE.SphereGeometry(0.1, 16, 12);
     const mouseMat = new THREE.MeshStandardMaterial({
       color: 0x3A3A44, metalness: 0.7, roughness: 0.3,
     });
     const mouseBody = new THREE.Mesh(mouseBodyGeo, mouseMat);
-    mouseBody.rotation.x = Math.PI / 2;
-    mouseBody.scale.set(1.4, 0.35, 1);
+    mouseBody.scale.set(1, 0.3, 1.5);
     mouseGroup.add(mouseBody);
     // Scroll wheel
     const wheelGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.04, 8);
