@@ -139,28 +139,138 @@
   /* ─── MONITOR ─── */
   function createMonitor() {
     // Monitor body (thin box)
-    const bodyGeo = new THREE.BoxGeometry(3, 1.8, 0.08);
+    const bodyGeo = new THREE.BoxGeometry(3, 1.8, 0.1);
     const bodyMat = new THREE.MeshStandardMaterial({
       color: 0x111122,
       metalness: 0.7,
       roughness: 0.3,
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.set(0, 1.64, -0.3);
+    body.position.set(0, 1.64, -0.35);
     scene.add(body);
     desk.monitorBody = body;
 
-    // Screen (glowing emissive plane)
+    // ── Screen with CanvasTexture (fake website UI) ──
+    const screenCanvas = document.createElement('canvas');
+    screenCanvas.width = 1024;
+    screenCanvas.height = 600;
+    const ctx = screenCanvas.getContext('2d');
+
+    // Draw dark website UI on the canvas
+    function drawScreenUI(time) {
+      const w = screenCanvas.width;
+      const h = screenCanvas.height;
+
+      // Background
+      ctx.fillStyle = '#0A0A0F';
+      ctx.fillRect(0, 0, w, h);
+
+      // Top nav bar
+      ctx.fillStyle = 'rgba(18,18,26,0.9)';
+      ctx.fillRect(0, 0, w, 44);
+      // Nav brand
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = '#6366F1';
+      ctx.fillText('W', 24, 28);
+      ctx.fillStyle = '#F0F0F5';
+      ctx.fillText('ebTuria', 36, 28);
+      // Nav links
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = 'rgba(240,240,245,0.5)';
+      ['Servicios', 'Proyectos', 'Nosotros', 'Contacto'].forEach((t, i) => {
+        ctx.fillText(t, w - 340 + i * 80, 27);
+      });
+      // Nav CTA button
+      const grad1 = ctx.createLinearGradient(w - 100, 12, w - 20, 32);
+      grad1.addColorStop(0, '#6366F1');
+      grad1.addColorStop(1, '#06B6D4');
+      ctx.fillStyle = grad1;
+      ctx.beginPath();
+      ctx.roundRect(w - 110, 12, 86, 22, 11);
+      ctx.fill();
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Hablemos →', w - 102, 27);
+
+      // Hero section
+      ctx.font = 'bold 48px sans-serif';
+      ctx.fillStyle = '#F0F0F5';
+      ctx.fillText('Creamos', 60, 140);
+      ctx.fillText('experiencias', 60, 195);
+      const grad2 = ctx.createLinearGradient(60, 210, 500, 250);
+      grad2.addColorStop(0, '#6366F1');
+      grad2.addColorStop(0.5, '#06B6D4');
+      grad2.addColorStop(1, '#8B5CF6');
+      ctx.fillStyle = grad2;
+      ctx.font = 'bold 48px sans-serif';
+      ctx.fillText('inmersivas', 60, 250);
+
+      // Stats row
+      ctx.font = 'bold 20px sans-serif';
+      const stats = [{ n: '50+', l: 'Proyectos' }, { n: '98%', l: 'Satisfacción' }, { n: '5', l: 'Años' }];
+      stats.forEach((s, i) => {
+        const sx = 80 + i * 160;
+        ctx.fillStyle = '#6366F1';
+        ctx.fillText(s.n, sx, 320);
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = 'rgba(240,240,245,0.4)';
+        ctx.fillText(s.l, sx, 336);
+        ctx.font = 'bold 20px sans-serif';
+      });
+
+      // Cards on the right
+      const cardColors = ['#6366F1', '#06B6D4', '#8B5CF6'];
+      for (let i = 0; i < 3; i++) {
+        const cx = 620;
+        const cy = 70 + i * 115;
+        ctx.fillStyle = 'rgba(18,18,26,0.8)';
+        ctx.beginPath();
+        ctx.roundRect(cx, cy, 360, 100, 12);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // Card accent
+        ctx.fillStyle = cardColors[i];
+        ctx.fillRect(cx, cy, 3, 100);
+        // Card text
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillStyle = '#F0F0F5';
+        const titles = ['Diseño Web Premium', 'Automatización con IA', 'E-commerce'];
+        ctx.fillText(titles[i], cx + 20, cy + 30);
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = 'rgba(240,240,245,0.4)';
+        ctx.fillText('Tecnología de vanguardia', cx + 20, cy + 50);
+        // Fake chart bars
+        for (let b = 0; b < 5; b++) {
+          const bh = 15 + Math.sin(time * 2 + b + i) * 8;
+          ctx.fillStyle = cardColors[i] + '40';
+          ctx.fillRect(cx + 20 + b * 30, cy + 85 - bh, 20, bh);
+        }
+      }
+
+      // Animated scan line
+      const scanY = (time * 80) % h;
+      ctx.fillStyle = 'rgba(99,102,241,0.03)';
+      ctx.fillRect(0, scanY, w, 2);
+    }
+
+    drawScreenUI(0);
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+
     const screenGeo = new THREE.PlaneGeometry(2.7, 1.55);
     const screenMat = new THREE.MeshBasicMaterial({
-      color: 0x6366F1,
+      map: screenTexture,
       transparent: true,
-      opacity: 0.25,
+      opacity: 0.9,
     });
     const screen = new THREE.Mesh(screenGeo, screenMat);
-    screen.position.set(0, 1.64, -0.255);
+    screen.position.set(0, 1.64, -0.295);
     scene.add(screen);
     desk.screen = screen;
+    desk.screenCanvas = screenCanvas;
+    desk.screenTexture = screenTexture;
+    desk.drawScreenUI = drawScreenUI;
 
     // Screen glow ring (edge highlight)
     const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.72, 1.57, 0.01));
@@ -170,17 +280,17 @@
     scene.add(edgeLines);
     desk.screenEdge = edgeLines;
 
-    // Monitor stand
+    // Monitor stand — placed BEHIND the monitor body
     const standGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
     const standMat = new THREE.MeshStandardMaterial({ color: 0x0A0A12, metalness: 0.8, roughness: 0.2 });
     const stand = new THREE.Mesh(standGeo, standMat);
-    stand.position.set(0, 0.98, -0.3);
+    stand.position.set(0, 0.98, -0.55);
     scene.add(stand);
 
-    // Stand base
+    // Stand base — behind monitor
     const baseGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.04, 16);
     const base = new THREE.Mesh(baseGeo, standMat);
-    base.position.set(0, 0.75, -0.3);
+    base.position.set(0, 0.75, -0.55);
     scene.add(base);
   }
 
@@ -335,15 +445,16 @@
     const contentEl = document.getElementById('content');
     const canvasEl = document.getElementById('scene3d');
 
-    // Hero fade out on scroll
+    // Hero: starts fully opaque, fades as you scroll
+    heroEl.style.opacity = '1';
     gsap.to(heroEl, {
       opacity: 0,
       scale: 0.9,
       scrollTrigger: {
         trigger: heroEl,
-        start: 'top top',
+        start: 'top+=100px top',
         end: 'bottom top',
-        scrub: 1,
+        scrub: 0.8,
       }
     });
 
@@ -440,13 +551,15 @@
       }
     });
 
-    // ── Animate screen glow ──
-    if (desk.screen) {
-      const glow = 0.15 + Math.sin(t * 2) * 0.08;
-      desk.screen.material.opacity = glow + p * 0.3;
+    // ── Animate screen texture (update canvas) ──
+    if (desk.drawScreenUI && desk.screenTexture) {
+      desk.drawScreenUI(t);
+      desk.screenTexture.needsUpdate = true;
+      // Increase brightness as camera approaches
+      desk.screen.material.opacity = 0.7 + p * 0.3;
     }
     if (desk.screenEdge) {
-      desk.screenEdge.material.opacity = 0.3 + Math.sin(t * 3) * 0.15 + p * 0.3;
+      desk.screenEdge.material.opacity = 0.4 + Math.sin(t * 3) * 0.1 + p * 0.3;
     }
 
     // ── Animate particles ──
