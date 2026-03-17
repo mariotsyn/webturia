@@ -146,12 +146,12 @@
 
   /* ─── MONITOR ─── */
   function createMonitor() {
-    // Monitor body (thin box)
+    // Monitor body (thin box) — silver/gray frame for contrast
     const bodyGeo = new THREE.BoxGeometry(3, 1.8, 0.1);
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x0D0D14,
-      metalness: 0.85,
-      roughness: 0.18,
+      color: 0x3A3A44,
+      metalness: 0.8,
+      roughness: 0.2,
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.set(0, 1.64, -0.35);
@@ -306,25 +306,18 @@
   function createKeyboard() {
     const kbGroup = new THREE.Group();
 
-    // Main body — sleek dark aluminum
+    // Main body — lighter aluminum, visible against dark desk
     const kbGeo = new THREE.BoxGeometry(1.4, 0.04, 0.5);
     const kbMat = new THREE.MeshStandardMaterial({
-      color: 0x18181F, metalness: 0.75, roughness: 0.25,
+      color: 0x3A3A44, metalness: 0.7, roughness: 0.3,
     });
     const kb = new THREE.Mesh(kbGeo, kbMat);
     kbGroup.add(kb);
 
-    // RGB underglow on keyboard base
-    const glowGeo = new THREE.BoxGeometry(1.38, 0.005, 0.48);
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0x6366F1, transparent: true, opacity: 0.15 });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.position.y = -0.025;
-    kbGroup.add(glow);
-
-    // Individual keys — dark caps with subtle lighter edges
+    // Individual keys — lighter caps for visibility
     const keyGeo = new THREE.BoxGeometry(0.08, 0.025, 0.08);
     const keyMat = new THREE.MeshStandardMaterial({
-      color: 0x222230, metalness: 0.6, roughness: 0.4,
+      color: 0x4A4A55, metalness: 0.5, roughness: 0.5,
     });
 
     for (let row = 0; row < 4; row++) {
@@ -339,31 +332,51 @@
     scene.add(kbGroup);
     desk.keyboard = kbGroup;
 
-    // Mouse — matching dark aluminum
-    const mouseGeo = new THREE.BoxGeometry(0.18, 0.04, 0.3);
+    // Mouse — rounded capsule shape, lighter color
+    const mouseGroup = new THREE.Group();
+    // Mouse body (rounded)
+    const mouseBodyGeo = new THREE.CapsuleGeometry(0.06, 0.12, 4, 12);
     const mouseMat = new THREE.MeshStandardMaterial({
-      color: 0x18181F, metalness: 0.75, roughness: 0.25,
+      color: 0x3A3A44, metalness: 0.7, roughness: 0.3,
     });
-    const mouseMesh = new THREE.Mesh(mouseGeo, mouseMat);
-    mouseMesh.position.set(1.2, 0.74, 0.55);
-    scene.add(mouseMesh);
-    desk.mouse = mouseMesh;
+    const mouseBody = new THREE.Mesh(mouseBodyGeo, mouseMat);
+    mouseBody.rotation.x = Math.PI / 2;
+    mouseBody.scale.set(1.4, 0.35, 1);
+    mouseGroup.add(mouseBody);
+    // Scroll wheel
+    const wheelGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.04, 8);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x555560, metalness: 0.6, roughness: 0.4 });
+    const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+    wheel.rotation.z = Math.PI / 2;
+    wheel.position.set(0, 0.025, -0.04);
+    mouseGroup.add(wheel);
+    mouseGroup.position.set(1.2, 0.74, 0.55);
+    scene.add(mouseGroup);
+    desk.mouse = mouseGroup;
 
-    // Coffee mug — frosted ceramic with accent ring
+    // Coffee mug — ceramic with handle
+    const mugGroup = new THREE.Group();
     const mugGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.22, 16);
     const mugMat = new THREE.MeshStandardMaterial({
-      color: 0xE8E4DF, metalness: 0.05, roughness: 0.85,
+      color: 0xD5D0CA, metalness: 0.05, roughness: 0.85,
     });
     const mug = new THREE.Mesh(mugGeo, mugMat);
-    mug.position.set(-1.8, 0.85, 0.4);
-    scene.add(mug);
-    // Mug accent ring
-    const ringGeo = new THREE.TorusGeometry(0.115, 0.012, 8, 24);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.6 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(-1.8, 0.92, 0.4);
-    scene.add(ring);
+    mugGroup.add(mug);
+    // Mug handle
+    const handleGeo = new THREE.TorusGeometry(0.06, 0.015, 8, 16, Math.PI);
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0xD5D0CA, metalness: 0.05, roughness: 0.85 });
+    const handle = new THREE.Mesh(handleGeo, handleMat);
+    handle.position.set(0.13, 0.02, 0);
+    handle.rotation.z = Math.PI / 2;
+    mugGroup.add(handle);
+    // Dark coffee inside
+    const coffeeGeo = new THREE.CylinderGeometry(0.11, 0.11, 0.02, 16);
+    const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x2A1810, metalness: 0.1, roughness: 0.9 });
+    const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
+    coffee.position.y = 0.1;
+    mugGroup.add(coffee);
+    mugGroup.position.set(-1.8, 0.85, 0.4);
+    scene.add(mugGroup);
     desk.mug = mug;
   }
 
