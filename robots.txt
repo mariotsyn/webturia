@@ -1,0 +1,10 @@
+# WebTuria — robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.webturia.com/sitemap.xml
+
+# Block dev/tmp files
+Disallow: /tmp/
+Disallow: /*.js$
