@@ -1080,6 +1080,9 @@
           biosRunning = true;
           contentRevealed = true;
 
+          // Lock scroll during animation
+          document.body.style.overflow = 'hidden';
+
           // Start BIOS boot sequence
           warpEl.classList.remove('active', 'intense');
           biosEl.classList.add('active');
@@ -1098,10 +1101,16 @@
             // Flash
             flashEl.classList.add('flash');
             setTimeout(() => flashEl.classList.remove('flash'), 400);
-            // Hide BIOS, show content
+            // Hide BIOS, show content, scroll to top of content
             setTimeout(() => {
               biosEl.classList.remove('active');
               contentEl.classList.add('visible');
+              // Scroll to end of spacer so content starts at top
+              const spacerBottom = spacer.offsetTop + spacer.offsetHeight;
+              window.scrollTo({ top: spacerBottom, behavior: 'instant' });
+              // Unlock scroll
+              document.body.style.overflow = '';
+              ScrollTrigger.refresh();
             }, 200);
           }, lastDelay + 600);
         }
