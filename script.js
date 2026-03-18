@@ -378,16 +378,12 @@
     rim.position.y = 0.11;
     mugGroup.add(rim);
 
-    // Handle — vertical D-arch facing outward (+X)
-    const handleGeo = new THREE.TorusGeometry(0.07, 0.018, 12, 24, Math.PI);
+    // Handle — vertical arch on the side of the mug
+    const handleGeo = new THREE.TorusGeometry(0.08, 0.02, 12, 24, Math.PI);
     const handle = new THREE.Mesh(handleGeo, mugMat);
-    // Default half-torus is in XZ plane. We need vertical arch bulging outward.
-    // Step 1: rotate around Z by 90° → endpoints move to Y axis (vertical)
-    // Step 2: rotate around Y by 90° → arch direction swaps from Z to X (outward)
-    // Euler order is XYZ, so set x=0, y=PI/2, z=PI/2 → applied as Rz(PI/2)*Ry(PI/2)
-    handle.rotation.order = 'ZYX';
-    handle.rotation.set(0, Math.PI / 2, Math.PI / 2);
-    handle.position.set(0.12, 0, 0);
+    // Single rotation: Z by 90° flips the XZ half-ring so endpoints go vertical (Y-axis)
+    handle.rotation.z = Math.PI / 2;
+    handle.position.set(0.13, 0, 0);
     mugGroup.add(handle);
 
     // Dark coffee inside (slightly recessed below rim)
