@@ -381,14 +381,13 @@
     // Handle — vertical arch on the side of the mug
     const handleGeo = new THREE.TorusGeometry(0.08, 0.02, 12, 24, Math.PI);
     const handle = new THREE.Mesh(handleGeo, mugMat);
-    // Single rotation: Z by 90° flips the XZ half-ring so endpoints go vertical (Y-axis)
-    handle.rotation.z = Math.PI / 2;
+    handle.rotation.y = Math.PI / 2;
     handle.position.set(0.13, 0, 0);
     mugGroup.add(handle);
 
     // Dark coffee inside (slightly recessed below rim)
     const coffeeGeo = new THREE.CylinderGeometry(0.105, 0.105, 0.015, 24);
-    const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x0A0A0A, metalness: 0.2, roughness: 0.9 });
+    const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x050505, metalness: 0.0, roughness: 1.0 });
     const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
     coffee.position.y = 0.09;
     mugGroup.add(coffee);
