@@ -172,31 +172,47 @@
     screenCanvas.height = 600;
     const ctx = screenCanvas.getContext('2d');
 
-    // Draw dark website UI on the canvas
+    // Draw screen content — changes based on scroll progress
     function drawScreenUI(time) {
       const w = screenCanvas.width;
       const h = screenCanvas.height;
+      const sp = scrollProgress; // 0–1
 
-      // Background
+      // ── PHASE 1: Normal website UI (0–55%) ──
+      if (sp < 0.55) {
+        drawNormalUI(time, w, h);
+      }
+      // ── PHASE 2: Glitch + distortion (55–80%) ──
+      else if (sp < 0.80) {
+        const glitchPct = (sp - 0.55) / 0.25; // 0→1
+        drawNormalUI(time, w, h);
+        drawGlitchEffect(time, w, h, glitchPct);
+      }
+      // ── PHASE 3: Hyperspace star warp (80–100%) ──
+      else {
+        const warpPct = (sp - 0.80) / 0.20; // 0→1
+        drawStarWarp(time, w, h, warpPct);
+      }
+    }
+
+    // ── Normal Website UI (unchanged from original) ──
+    function drawNormalUI(time, w, h) {
       ctx.fillStyle = '#0A0A0F';
       ctx.fillRect(0, 0, w, h);
 
-      // Top nav bar
+      // Nav bar
       ctx.fillStyle = 'rgba(18,18,26,0.9)';
       ctx.fillRect(0, 0, w, 44);
-      // Nav brand
       ctx.font = 'bold 16px sans-serif';
       ctx.fillStyle = '#6366F1';
       ctx.fillText('W', 24, 28);
       ctx.fillStyle = '#F0F0F5';
       ctx.fillText('ebTuria', 36, 28);
-      // Nav links
       ctx.font = '11px sans-serif';
       ctx.fillStyle = 'rgba(240,240,245,0.5)';
       ['Servicios', 'Proyectos', 'Nosotros', 'Contacto'].forEach((t, i) => {
         ctx.fillText(t, w - 340 + i * 80, 27);
       });
-      // Nav CTA button
       const grad1 = ctx.createLinearGradient(w - 100, 12, w - 20, 32);
       grad1.addColorStop(0, '#6366F1');
       grad1.addColorStop(1, '#06B6D4');
@@ -208,7 +224,7 @@
       ctx.fillStyle = '#fff';
       ctx.fillText('Hablemos →', w - 102, 27);
 
-      // Hero section
+      // Hero text
       ctx.font = 'bold 48px sans-serif';
       ctx.fillStyle = '#F0F0F5';
       ctx.fillText('Creamos', 60, 140);
@@ -218,13 +234,11 @@
       grad2.addColorStop(0.5, '#06B6D4');
       grad2.addColorStop(1, '#8B5CF6');
       ctx.fillStyle = grad2;
-      ctx.font = 'bold 48px sans-serif';
       ctx.fillText('inmersivas', 60, 250);
 
-      // Stats row
+      // Stats
       ctx.font = 'bold 20px sans-serif';
-      const stats = [{ n: '50+', l: 'Proyectos' }, { n: '98%', l: 'Satisfacción' }, { n: '5', l: 'Años' }];
-      stats.forEach((s, i) => {
+      [{ n: '50+', l: 'Proyectos' }, { n: '98%', l: 'Satisfacción' }, { n: '5', l: 'Años' }].forEach((s, i) => {
         const sx = 80 + i * 160;
         ctx.fillStyle = '#6366F1';
         ctx.fillText(s.n, sx, 320);
@@ -234,11 +248,10 @@
         ctx.font = 'bold 20px sans-serif';
       });
 
-      // Cards on the right
+      // Cards
       const cardColors = ['#6366F1', '#06B6D4', '#8B5CF6'];
       for (let i = 0; i < 3; i++) {
-        const cx = 620;
-        const cy = 70 + i * 115;
+        const cx = 620, cy = 70 + i * 115;
         ctx.fillStyle = 'rgba(18,18,26,0.8)';
         ctx.beginPath();
         ctx.roundRect(cx, cy, 360, 100, 12);
@@ -246,18 +259,14 @@
         ctx.strokeStyle = 'rgba(255,255,255,0.06)';
         ctx.lineWidth = 1;
         ctx.stroke();
-        // Card accent
         ctx.fillStyle = cardColors[i];
         ctx.fillRect(cx, cy, 3, 100);
-        // Card text
         ctx.font = 'bold 14px sans-serif';
         ctx.fillStyle = '#F0F0F5';
-        const titles = ['Diseño Web Premium', 'Automatización con IA', 'E-commerce'];
-        ctx.fillText(titles[i], cx + 20, cy + 30);
+        ctx.fillText(['Diseño Web Premium', 'Automatización con IA', 'E-commerce'][i], cx + 20, cy + 30);
         ctx.font = '11px sans-serif';
         ctx.fillStyle = 'rgba(240,240,245,0.4)';
         ctx.fillText('Tecnología de vanguardia', cx + 20, cy + 50);
-        // Fake chart bars
         for (let b = 0; b < 5; b++) {
           const bh = 15 + Math.sin(time * 2 + b + i) * 8;
           ctx.fillStyle = cardColors[i] + '40';
@@ -265,10 +274,133 @@
         }
       }
 
-      // Animated scan line
+      // Scan line
       const scanY = (time * 80) % h;
       ctx.fillStyle = 'rgba(99,102,241,0.03)';
       ctx.fillRect(0, scanY, w, 2);
+    }
+
+    // ── Glitch overlay effect ──
+    function drawGlitchEffect(time, w, h, intensity) {
+      // Horizontal displacement bars
+      const numBars = Math.floor(3 + intensity * 15);
+      for (let i = 0; i < numBars; i++) {
+        const y = Math.floor(Math.random() * h);
+        const barH = 1 + Math.floor(Math.random() * (4 + intensity * 12));
+        const shift = (Math.random() - 0.5) * intensity * 60;
+        // Grab and shift a strip
+        const imgData = ctx.getImageData(0, y, w, barH);
+        ctx.putImageData(imgData, shift, y);
+      }
+
+      // RGB split — shift red channel
+      if (intensity > 0.3) {
+        const splitAmt = Math.floor(intensity * 8);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = intensity * 0.15;
+        ctx.drawImage(screenCanvas, splitAmt, 0);
+        ctx.drawImage(screenCanvas, -splitAmt, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+      }
+
+      // Random corruption blocks
+      const numBlocks = Math.floor(intensity * 8);
+      for (let i = 0; i < numBlocks; i++) {
+        const bx = Math.random() * w;
+        const by = Math.random() * h;
+        const bw = 20 + Math.random() * 80 * intensity;
+        const bh2 = 2 + Math.random() * 10;
+        ctx.fillStyle = ['#6366F1', '#06B6D4', '#8B5CF6', '#000'][Math.floor(Math.random() * 4)];
+        ctx.globalAlpha = 0.3 + intensity * 0.4;
+        ctx.fillRect(bx, by, bw, bh2);
+        ctx.globalAlpha = 1;
+      }
+
+      // Aggressive scan lines
+      for (let y = 0; y < h; y += 3) {
+        ctx.fillStyle = `rgba(0,0,0,${0.05 + intensity * 0.15})`;
+        ctx.fillRect(0, y, w, 1);
+      }
+
+      // Random flicker to black
+      if (Math.random() < intensity * 0.15) {
+        ctx.fillStyle = `rgba(0,0,0,${0.4 + intensity * 0.4})`;
+        ctx.fillRect(0, 0, w, h);
+      }
+    }
+
+    // ── Star Warp / Hyperspace ──
+    // Pre-generate star field (persistent across frames)
+    const warpStars = [];
+    for (let i = 0; i < 300; i++) {
+      warpStars.push({
+        angle: Math.random() * Math.PI * 2,
+        dist: Math.random(),
+        speed: 0.3 + Math.random() * 0.7,
+        brightness: 0.3 + Math.random() * 0.7,
+      });
+    }
+
+    function drawStarWarp(time, w, h, intensity) {
+      // Black background
+      ctx.fillStyle = '#000005';
+      ctx.fillRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const maxDist = Math.sqrt(cx * cx + cy * cy);
+
+      // Draw stars streaking from center outward
+      warpStars.forEach(star => {
+        // Stars move outward over time
+        const moveDist = ((star.dist + time * star.speed * 0.3) % 1);
+        const len = 2 + moveDist * (20 + intensity * 80); // streak length
+        const dist = moveDist * maxDist;
+
+        const x1 = cx + Math.cos(star.angle) * dist;
+        const y1 = cy + Math.sin(star.angle) * dist;
+        const x2 = cx + Math.cos(star.angle) * Math.max(0, dist - len);
+        const y2 = cy + Math.sin(star.angle) * Math.max(0, dist - len);
+
+        // Color shifts from white to blue/cyan as intensity increases
+        const alpha = star.brightness * (0.3 + intensity * 0.7) * moveDist;
+        const r = Math.floor(180 + 75 * (1 - intensity));
+        const g = Math.floor(180 + 75 * (1 - intensity * 0.5));
+        const b = 255;
+
+        ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+        ctx.lineWidth = 0.5 + moveDist * (1 + intensity * 2);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      });
+
+      // Central bright glow that intensifies
+      const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80 + intensity * 120);
+      glowGrad.addColorStop(0, `rgba(99,102,241,${0.1 + intensity * 0.3})`);
+      glowGrad.addColorStop(0.3, `rgba(6,182,212,${0.05 + intensity * 0.15})`);
+      glowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Edge vignette
+      const vigGrad = ctx.createRadialGradient(cx, cy, maxDist * 0.3, cx, cy, maxDist);
+      vigGrad.addColorStop(0, 'transparent');
+      vigGrad.addColorStop(1, `rgba(0,0,10,${0.5 + intensity * 0.4})`);
+      ctx.fillStyle = vigGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // "ENTERING" text at high intensity
+      if (intensity > 0.6) {
+        const textAlpha = (intensity - 0.6) / 0.4;
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillStyle = `rgba(6,182,212,${textAlpha * 0.6})`;
+        ctx.textAlign = 'center';
+        ctx.fillText('E N T E R I N G', cx, cy + 100);
+        ctx.textAlign = 'start';
+      }
     }
 
     drawScreenUI(0);
@@ -602,6 +734,8 @@
 
     const heroEl = document.getElementById('hero');
     const spacer = document.getElementById('zoom-spacer');
+    const warpEl = document.getElementById('warp-overlay');
+    const biosEl = document.getElementById('bios-overlay');
     const flashEl = document.getElementById('flash-overlay');
     const contentEl = document.getElementById('content');
     const canvasEl = document.getElementById('scene3d');
@@ -627,31 +761,68 @@
       scrub: 1.5,
       onUpdate: self => {
         scrollProgress = self.progress;
+
+        // Activate warp overlay at 65%+
+        if (self.progress > 0.65) {
+          warpEl.classList.add('active');
+          if (self.progress > 0.82) {
+            warpEl.classList.add('intense');
+          } else {
+            warpEl.classList.remove('intense');
+          }
+        } else {
+          warpEl.classList.remove('active', 'intense');
+        }
       }
     });
 
-    // Flash + content reveal at end of zoom
+    // BIOS boot + content reveal at end of zoom
+    let biosRunning = false;
     ScrollTrigger.create({
       trigger: spacer,
-      start: 'bottom-=300px bottom',
+      start: 'bottom-=200px bottom',
       end: 'bottom bottom',
       onEnter: () => {
-        if (!contentRevealed) {
+        if (!contentRevealed && !biosRunning) {
+          biosRunning = true;
           contentRevealed = true;
-          // Flash effect
-          flashEl.classList.add('flash');
-          setTimeout(() => flashEl.classList.remove('flash'), 400);
-          // Reveal content
+
+          // Start BIOS boot sequence
+          warpEl.classList.remove('active', 'intense');
+          biosEl.classList.add('active');
+          canvasEl.classList.add('fade');
+
+          // Type out BIOS lines one by one
+          const lines = biosEl.querySelectorAll('.bios-line');
+          lines.forEach(line => {
+            const delay = parseInt(line.dataset.delay) || 0;
+            setTimeout(() => line.classList.add('vis'), delay);
+          });
+
+          // After all lines are shown → flash → reveal content
+          const lastDelay = parseInt(lines[lines.length - 1].dataset.delay) || 2400;
           setTimeout(() => {
-            contentEl.classList.add('visible');
-            canvasEl.classList.add('fade');
-          }, 200);
+            // Flash
+            flashEl.classList.add('flash');
+            setTimeout(() => flashEl.classList.remove('flash'), 400);
+            // Hide BIOS, show content
+            setTimeout(() => {
+              biosEl.classList.remove('active');
+              contentEl.classList.add('visible');
+            }, 200);
+          }, lastDelay + 800);
         }
       },
       onLeaveBack: () => {
+        // Reset everything when scrolling back up
         contentRevealed = false;
+        biosRunning = false;
         contentEl.classList.remove('visible');
         canvasEl.classList.remove('fade');
+        biosEl.classList.remove('active');
+        flashEl.classList.remove('flash');
+        // Reset BIOS lines
+        biosEl.querySelectorAll('.bios-line').forEach(l => l.classList.remove('vis'));
       }
     });
   }

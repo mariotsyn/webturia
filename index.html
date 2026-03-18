@@ -156,7 +156,24 @@
     <!-- PHASE 2: 3D ZOOM SPACER (25-75% scroll — camera flies toward monitor) -->
     <div id="zoom-spacer" aria-hidden="true"></div>
 
-    <!-- PHASE 3: TRANSITION FLASH -->
+    <!-- PHASE 3: WARP SPEED OVERLAY -->
+    <div id="warp-overlay" aria-hidden="true"></div>
+
+    <!-- PHASE 3B: BIOS BOOT SEQUENCE -->
+    <div id="bios-overlay" aria-hidden="true">
+      <div class="bios-screen">
+        <div class="bios-line" data-delay="0">WEBTURIA BIOS v2.1 — Initializing...</div>
+        <div class="bios-line" data-delay="300">Checking hardware...</div>
+        <div class="bios-line" data-delay="600">RAM: 32GB <span class="bios-bar">████████████</span> <span class="bios-ok">OK</span></div>
+        <div class="bios-line" data-delay="900">GPU: RTX 5090 <span class="bios-bar">████████████</span> <span class="bios-ok">OK</span></div>
+        <div class="bios-line" data-delay="1200">CREATIVITY ENGINE: <span class="bios-ok">LOADED</span></div>
+        <div class="bios-line" data-delay="1500">NETWORK: webturia.com <span class="bios-ok">CONNECTED</span></div>
+        <div class="bios-line bios-cmd" data-delay="1900">&gt; boot webturia.os_</div>
+        <div class="bios-line bios-welcome" data-delay="2400">WELCOME TO THE MATRIX</div>
+      </div>
+    </div>
+
+    <!-- PHASE 3C: FLASH TRANSITION -->
     <div id="flash-overlay"></div>
 
     <!-- PHASE 4: INSIDE THE SCREEN — real content -->
@@ -360,6 +377,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="script.js?v=8"></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>
