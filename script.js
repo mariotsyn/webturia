@@ -810,7 +810,7 @@
               biosEl.classList.remove('active');
               contentEl.classList.add('visible');
             }, 200);
-          }, lastDelay + 800);
+          }, lastDelay + 600);
         }
       },
       onLeaveBack: () => {

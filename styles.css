@@ -99,30 +99,20 @@ a{color:inherit;text-decoration:none}
 #bios-overlay.active{opacity:1;visibility:visible}
 .bios-screen{
   font-family:'Courier New',monospace;
-  font-size:clamp(.75rem,1.5vw,1rem);
-  color:#33ff33;line-height:2.2;
-  max-width:600px;padding:2rem;
-  text-shadow:0 0 8px rgba(51,255,51,.4);
+  font-size:clamp(.8rem,1.5vw,1rem);
+  color:rgba(255,255,255,.85);line-height:2.4;
+  max-width:550px;padding:2rem;
 }
 .bios-line{opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
 .bios-line.vis{opacity:1;transform:translateY(0)}
-.bios-bar{color:#06B6D4}
 .bios-ok{color:#10B981;font-weight:700}
-.bios-cmd{color:#06B6D4;font-weight:700}
 .bios-welcome{
-  color:#fff;font-size:clamp(1rem,2.5vw,1.6rem);font-weight:700;
-  text-shadow:0 0 20px rgba(99,102,241,.6),0 0 40px rgba(6,182,212,.3);
-  margin-top:.5rem;
+  color:#fff;font-size:clamp(1rem,2.2vw,1.4rem);font-weight:700;
+  margin-top:.8rem;
+  background:linear-gradient(90deg,#6366F1,#06B6D4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
 }
-
-/* Blinking cursor on the command line */
-.bios-cmd::after{
-  content:'';display:inline-block;
-  width:8px;height:1em;background:#06B6D4;
-  margin-left:4px;vertical-align:text-bottom;
-  animation:cursorBlink 1s step-end infinite;
-}
-@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ═══ FLASH TRANSITION ═══ */
 #flash-overlay{
