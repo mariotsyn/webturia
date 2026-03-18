@@ -50,9 +50,7 @@ a{color:inherit;text-decoration:none}
   transform:scale(2.5);opacity:0;
   transition:transform .6s cubic-bezier(.2,1,.3,1),opacity .5s .2s;
 }
-#preloader.done .pl-logo{
-  filter:drop-shadow(0 0 60px rgba(99,102,241,.8)) drop-shadow(0 0 120px rgba(6,182,212,.5));
-}
+
 
 /* Phase 2: Light ring expands from center */
 #preloader::after{
@@ -79,13 +77,19 @@ a{color:inherit;text-decoration:none}
 }
 
 .pl-inner{text-align:center;position:relative;z-index:2;transition:transform .3s, opacity .3s}
-.pl-logo{
+.pl-logo-wrap{
   width:100px;height:100px;margin:0 auto 1.5rem;
-  border-radius:50%;
-  background:#fff;
+  border-radius:50%;background:#fff;
+  overflow:hidden;
   animation:orbP 2s ease infinite;
   filter:drop-shadow(0 0 20px rgba(99,102,241,.3));
   transition:filter .4s;
+}
+#preloader.done .pl-logo-wrap{
+  filter:drop-shadow(0 0 60px rgba(99,102,241,.8)) drop-shadow(0 0 120px rgba(6,182,212,.5));
+}
+.pl-logo{
+  width:100%;height:100%;display:block;
 }
 @keyframes orbP{0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(99,102,241,.3))}50%{transform:scale(1.08);filter:drop-shadow(0 0 40px rgba(99,102,241,.5))}}
 .pl-brand{font-family:var(--font);font-size:1.8rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -386,6 +390,7 @@ footer{position:relative;z-index:3;padding:3rem 0 2rem;border-top:1px solid var(
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:480px){
   html{font-size:15px}
+  #hero{align-items:flex-start;padding-top:calc(var(--nav-h) + 1.5rem)}
   #hero h1{letter-spacing:-1px}
   .sec{padding:4rem 0}
   .svc{padding:1.5rem}
@@ -398,6 +403,7 @@ footer{position:relative;z-index:3;padding:3rem 0 2rem;border-top:1px solid var(
   .nav-in{padding:0 1.25rem}
   .stats-band .contain{gap:1.2rem}
   .stat strong{font-size:1.8rem}
+  #hero{align-items:flex-start;padding-top:calc(var(--nav-h) + 1.5rem)}
 }
 @media(min-width:1400px){.contain{max-width:1360px}}
 
