@@ -1114,23 +1114,27 @@
             }, 200);
           }, lastDelay + 600);
         }
-      },
-      onLeaveBack: () => {
-        // Reset everything when scrolling back up
+      }
+    });
+
+    // Detect scroll-back: when user scrolls above spacer bottom, reset everything
+    function resetToScene() {
+      if (!contentRevealed) return;
+      const spacerBottom = spacer.offsetTop + spacer.offsetHeight;
+      if (window.scrollY < spacerBottom - 300) {
         contentRevealed = false;
         biosRunning = false;
         contentEl.classList.remove('visible');
         canvasEl.classList.remove('fade');
         biosEl.classList.remove('active');
         flashEl.classList.remove('flash');
-        // Make sure scroll is unlocked
+        warpEl.classList.remove('active', 'intense');
         document.body.style.overflow = '';
-        // Reset BIOS lines
         biosEl.querySelectorAll('.bios-line').forEach(l => l.classList.remove('vis'));
-        // Refresh scroll positions
         ScrollTrigger.refresh();
       }
-    });
+    }
+    window.addEventListener('scroll', resetToScene, { passive: true });
   }
 
   /* ═══════════════════════════════════════════════
