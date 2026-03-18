@@ -18,10 +18,13 @@
   const CAM_MID   = { x: 0, y: 2.2, z: 5 };
   const CAM_END   = { x: 0, y: 1.65, z: 0.6 };
 
-  // Mobile camera positions (closer, framing the phone)
-  const MOB_CAM_START = { x: 0, y: 3.5, z: 7 };
-  const MOB_CAM_MID   = { x: 0, y: 2.0, z: 3.5 };
-  const MOB_CAM_END   = { x: 0, y: 1.5, z: 0.5 };
+  // Mobile camera positions — side approach → rise above → descend into phone
+  const MOB_CAM_START = { x: 2.5, y: 1.2, z: 4 };
+  const MOB_CAM_MID   = { x: 0, y: 4.0, z: 1.5 };
+  const MOB_CAM_END   = { x: 0, y: 1.5, z: 0.15 };
+  const MOB_LOOK_START = { y: 0.8 };
+  const MOB_LOOK_MID   = { y: 0.75 };
+  const MOB_LOOK_END   = { y: 0.75 };
 
   const LOOK_START = { x: 0, y: 1.2, z: 0 };
   const LOOK_END   = { x: 0, y: 1.6, z: -1 };
@@ -931,9 +934,9 @@
     dock.position.set(0, -0.78, 0.02);
     phoneGroup.add(dock);
 
-    // Position phone on desk, slightly tilted back
-    phoneGroup.position.set(0, 1.55, 0.1);
-    phoneGroup.rotation.x = -0.12; // slight tilt back
+    // Position phone lying flat on desk (face up)
+    phoneGroup.position.set(0, 0.78, 0.1);
+    phoneGroup.rotation.x = -Math.PI / 2; // flat, face up
     scene.add(phoneGroup);
     desk.phone = phoneGroup;
   }
@@ -1138,28 +1141,48 @@
     // ── Camera position based on scroll progress ──
     const p = scrollProgress;
 
-    const cStart = isMobile ? MOB_CAM_START : CAM_START;
-    const cMid   = isMobile ? MOB_CAM_MID   : CAM_MID;
-    const cEnd   = isMobile ? MOB_CAM_END   : CAM_END;
-    const lookStartY = isMobile ? 1.0 : LOOK_START.y;
-    const lookMidY   = isMobile ? 1.4 : 1.5;
-
     let camX, camY, camZ, lookY;
 
-    if (p < 0.4) {
-      const t2 = p / 0.4;
-      const ease = t2 * t2 * (3 - 2 * t2);
-      camX = lerp(cStart.x, cMid.x, ease);
-      camY = lerp(cStart.y, cMid.y, ease);
-      camZ = lerp(cStart.z, cMid.z, ease);
-      lookY = lerp(lookStartY, lookMidY, ease);
+    if (isMobile) {
+      // Mobile: side approach → rise above → descend into phone
+      if (p < 0.35) {
+        // Phase 1: Approach from side, moving toward center
+        const t2 = p / 0.35;
+        const ease = t2 * t2 * (3 - 2 * t2);
+        camX = lerp(MOB_CAM_START.x, MOB_CAM_MID.x, ease);
+        camY = lerp(MOB_CAM_START.y, MOB_CAM_MID.y, ease);
+        camZ = lerp(MOB_CAM_START.z, MOB_CAM_MID.z, ease);
+        lookY = lerp(MOB_LOOK_START.y, MOB_LOOK_MID.y, ease);
+      } else {
+        // Phase 2: From above, descend into the phone screen
+        const t2 = (p - 0.35) / 0.65;
+        const ease = t2 * t2 * (3 - 2 * t2);
+        camX = lerp(MOB_CAM_MID.x, MOB_CAM_END.x, ease);
+        camY = lerp(MOB_CAM_MID.y, MOB_CAM_END.y, ease);
+        camZ = lerp(MOB_CAM_MID.z, MOB_CAM_END.z, ease);
+        lookY = lerp(MOB_LOOK_MID.y, MOB_LOOK_END.y, ease);
+      }
     } else {
-      const t2 = (p - 0.4) / 0.6;
-      const ease = t2 * t2 * (3 - 2 * t2);
-      camX = lerp(cMid.x, cEnd.x, ease);
-      camY = lerp(cMid.y, cEnd.y, ease);
-      camZ = lerp(cMid.z, cEnd.z, ease);
-      lookY = lerp(lookMidY, LOOK_END.y, ease);
+      // Desktop: original camera path
+      const cStart = CAM_START;
+      const cMid   = CAM_MID;
+      const cEnd   = CAM_END;
+
+      if (p < 0.4) {
+        const t2 = p / 0.4;
+        const ease = t2 * t2 * (3 - 2 * t2);
+        camX = lerp(cStart.x, cMid.x, ease);
+        camY = lerp(cStart.y, cMid.y, ease);
+        camZ = lerp(cStart.z, cMid.z, ease);
+        lookY = lerp(LOOK_START.y, 1.5, ease);
+      } else {
+        const t2 = (p - 0.4) / 0.6;
+        const ease = t2 * t2 * (3 - 2 * t2);
+        camX = lerp(cMid.x, cEnd.x, ease);
+        camY = lerp(cMid.y, cEnd.y, ease);
+        camZ = lerp(cMid.z, cEnd.z, ease);
+        lookY = lerp(1.5, LOOK_END.y, ease);
+      }
     }
 
     // Add subtle mouse-based camera offset
