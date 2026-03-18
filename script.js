@@ -101,6 +101,7 @@
     createDesk();
     createMonitor();
     createKeyboard();
+    createGamingPC();
     createFloaters();
     createGridFloor();
     createParticles();
@@ -401,6 +402,111 @@
     desk.mug = mug;
   }
 
+  /* ─── GAMING PC TOWER ─── */
+  function createGamingPC() {
+    const pcGroup = new THREE.Group();
+
+    // Case body — matte dark metal
+    const caseMat = new THREE.MeshStandardMaterial({
+      color: 0x1A1A22, metalness: 0.6, roughness: 0.4,
+    });
+
+    // Main case box
+    const caseGeo = new THREE.BoxGeometry(0.35, 0.7, 0.55);
+    const caseBody = new THREE.Mesh(caseGeo, caseMat);
+    pcGroup.add(caseBody);
+
+    // Tempered glass side panel (facing camera)
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x1A1A3A, metalness: 0.9, roughness: 0.05,
+      transparent: true, opacity: 0.35,
+    });
+    const glassGeo = new THREE.PlaneGeometry(0.30, 0.58);
+    const glass = new THREE.Mesh(glassGeo, glassMat);
+    glass.position.set(0.176, 0.02, 0);
+    glass.rotation.y = Math.PI / 2;
+    pcGroup.add(glass);
+
+    // Internal RGB glow (visible through glass)
+    const innerGlow = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.28, 0.54),
+      new THREE.MeshBasicMaterial({
+        color: 0x6366F1, transparent: true, opacity: 0.12,
+        side: THREE.DoubleSide,
+      })
+    );
+    innerGlow.position.set(0.17, 0.02, 0);
+    innerGlow.rotation.y = Math.PI / 2;
+    pcGroup.add(innerGlow);
+    desk.pcInnerGlow = innerGlow;
+
+    // RGB LED strip — top edge (horizontal line)
+    const ledTopGeo = new THREE.BoxGeometry(0.005, 0.005, 0.50);
+    const ledMat = new THREE.MeshBasicMaterial({ color: 0x06B6D4 });
+    const ledTop = new THREE.Mesh(ledTopGeo, ledMat);
+    ledTop.position.set(0.175, 0.33, 0);
+    pcGroup.add(ledTop);
+    desk.pcLedTop = ledTop;
+
+    // RGB LED strip — bottom edge
+    const ledBot = new THREE.Mesh(ledTopGeo, ledMat.clone());
+    ledBot.position.set(0.175, -0.29, 0);
+    pcGroup.add(ledBot);
+    desk.pcLedBot = ledBot;
+
+    // RGB LED strip — vertical front edge
+    const ledSideGeo = new THREE.BoxGeometry(0.005, 0.62, 0.005);
+    const ledSide = new THREE.Mesh(ledSideGeo, ledMat.clone());
+    ledSide.position.set(0.175, 0.02, 0.25);
+    pcGroup.add(ledSide);
+    desk.pcLedSide = ledSide;
+
+    // Front panel — darker face with ventilation lines
+    const frontMat = new THREE.MeshStandardMaterial({
+      color: 0x111118, metalness: 0.5, roughness: 0.6,
+    });
+    const frontPanel = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.33, 0.68),
+      frontMat
+    );
+    frontPanel.position.set(0, 0, 0.276);
+    pcGroup.add(frontPanel);
+
+    // Front mesh/vent lines
+    const ventMat = new THREE.MeshBasicMaterial({ color: 0x2A2A35 });
+    for (let i = 0; i < 8; i++) {
+      const vent = new THREE.Mesh(
+        new THREE.BoxGeometry(0.24, 0.008, 0.002),
+        ventMat
+      );
+      vent.position.set(0, 0.22 - i * 0.055, 0.278);
+      pcGroup.add(vent);
+    }
+
+    // Power button (small circle with LED)
+    const pwrGeo = new THREE.CircleGeometry(0.012, 12);
+    const pwrMat = new THREE.MeshBasicMaterial({ color: 0x06B6D4 });
+    const pwrBtn = new THREE.Mesh(pwrGeo, pwrMat);
+    pwrBtn.position.set(0, -0.25, 0.278);
+    pcGroup.add(pwrBtn);
+
+    // USB ports (small rectangles on front)
+    const usbMat = new THREE.MeshBasicMaterial({ color: 0x0A0A12 });
+    for (let i = 0; i < 2; i++) {
+      const usb = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.02, 0.008),
+        usbMat
+      );
+      usb.position.set(-0.03 + i * 0.06, -0.22, 0.278);
+      pcGroup.add(usb);
+    }
+
+    // Position on desk — right side of monitor
+    pcGroup.position.set(1.8, 1.09, -0.15);
+    scene.add(pcGroup);
+    desk.pc = pcGroup;
+  }
+
   /* ─── FLOATING GEOMETRIC SHAPES ─── */
   function createFloaters() {
     const shapes = [
@@ -615,6 +721,19 @@
     }
     if (desk.screenEdge) {
       desk.screenEdge.material.opacity = 0.4 + Math.sin(t * 3) * 0.1 + p * 0.3;
+    }
+
+    // ── Animate PC RGB LEDs ──
+    if (desk.pcLedTop) {
+      const r = Math.sin(t * 0.8) * 0.5 + 0.5;
+      const g = Math.sin(t * 0.8 + 2.1) * 0.5 + 0.5;
+      const b = Math.sin(t * 0.8 + 4.2) * 0.5 + 0.5;
+      const rgbColor = new THREE.Color(r * 0.4 + 0.1, g * 0.3, b * 0.8 + 0.2);
+      desk.pcLedTop.material.color.copy(rgbColor);
+      desk.pcLedBot.material.color.copy(rgbColor);
+      desk.pcLedSide.material.color.copy(rgbColor);
+      desk.pcInnerGlow.material.opacity = 0.08 + Math.sin(t * 1.5) * 0.06;
+      desk.pcInnerGlow.material.color.copy(rgbColor);
     }
 
     // ── Animate particles ──
