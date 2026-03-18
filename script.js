@@ -378,11 +378,12 @@
     rim.position.y = 0.11;
     mugGroup.add(rim);
 
-    // Black coffee inside
-    const coffeeGeo = new THREE.CylinderGeometry(0.105, 0.105, 0.015, 24);
-    const coffeeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    // Black coffee inside — flat disc to avoid z-fighting with mug top cap
+    const coffeeGeo = new THREE.CircleGeometry(0.105, 24);
+    const coffeeMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
     const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
-    coffee.position.y = 0.09;
+    coffee.rotation.x = -Math.PI / 2;
+    coffee.position.y = 0.10;
     mugGroup.add(coffee);
 
     mugGroup.position.set(-1.8, 0.85, 0.4);
