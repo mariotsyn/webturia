@@ -18,13 +18,13 @@
   const CAM_MID   = { x: 0, y: 2.2, z: 5 };
   const CAM_END   = { x: 0, y: 1.65, z: 0.6 };
 
-  // Mobile camera positions — side approach → rise above → descend into phone
-  const MOB_CAM_START = { x: 2.5, y: 1.2, z: 4 };
-  const MOB_CAM_MID   = { x: 0, y: 4.0, z: 1.5 };
-  const MOB_CAM_END   = { x: 0, y: 1.5, z: 0.15 };
-  const MOB_LOOK_START = { y: 0.8 };
-  const MOB_LOOK_MID   = { y: 0.75 };
-  const MOB_LOOK_END   = { y: 0.75 };
+  // Mobile camera positions — centered front → rise above → descend into phone
+  const MOB_CAM_START = { x: 0, y: 1.8, z: 6 };
+  const MOB_CAM_MID   = { x: 0, y: 3.5, z: 0.8 };
+  const MOB_CAM_END   = { x: 0, y: 1.2, z: 0.12 };
+  const MOB_LOOK_START = { y: 0.78 };
+  const MOB_LOOK_MID   = { y: 0.78 };
+  const MOB_LOOK_END   = { y: 0.78 };
 
   const LOOK_START = { x: 0, y: 1.2, z: 0 };
   const LOOK_END   = { x: 0, y: 1.6, z: -1 };
