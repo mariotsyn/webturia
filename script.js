@@ -243,14 +243,14 @@
       // Hero text
       ctx.font = 'bold 48px sans-serif';
       ctx.fillStyle = '#F0F0F5';
-      ctx.fillText('Creamos', 60, 140);
-      ctx.fillText('experiencias', 60, 195);
+      ctx.fillText('Diseño Web', 60, 140);
+      ctx.fillText('en Valencia', 60, 195);
       const grad2 = ctx.createLinearGradient(60, 210, 500, 250);
       grad2.addColorStop(0, '#6366F1');
       grad2.addColorStop(0.5, '#06B6D4');
       grad2.addColorStop(1, '#8B5CF6');
       ctx.fillStyle = grad2;
-      ctx.fillText('inmersivas', 60, 250);
+      ctx.fillText('a otro nivel', 60, 250);
 
       // Stats
       ctx.font = 'bold 20px sans-serif';
@@ -757,14 +757,14 @@
       // Hero text (stacked for portrait)
       ctx.font = 'bold 42px sans-serif';
       ctx.fillStyle = '#F0F0F5';
-      ctx.fillText('Creamos', 30, 170);
-      ctx.fillText('experiencias', 30, 220);
+      ctx.fillText('Diseño Web', 30, 170);
+      ctx.fillText('en Valencia', 30, 220);
       const grad2 = ctx.createLinearGradient(30, 230, 400, 270);
       grad2.addColorStop(0, '#6366F1');
       grad2.addColorStop(0.5, '#06B6D4');
       grad2.addColorStop(1, '#8B5CF6');
       ctx.fillStyle = grad2;
-      ctx.fillText('inmersivas', 30, 270);
+      ctx.fillText('a otro nivel', 30, 270);
 
       // Stats row
       ctx.font = 'bold 18px sans-serif';
