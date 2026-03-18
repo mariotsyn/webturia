@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad-light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#0288D1"/>
+    </linearGradient>
+    <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1A237E"/>
+      <stop offset="100%" stop-color="#0D1B3E"/>
+    </linearGradient>
+    <clipPath id="circle-clip">
+      <circle cx="100" cy="100" r="95"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="url(#grad-dark)" stroke-width="4"/>
+
+  <g clip-path="url(#circle-clip)">
+    <!-- Dark half (left/top yin) -->
+    <path d="M100 5 A95 95 0 0 0 100 195 A47.5 47.5 0 0 0 100 100 A47.5 47.5 0 0 1 100 5Z" 
+          fill="url(#grad-dark)"/>
+    
+    <!-- Light half (right/bottom yang) -->
+    <path d="M100 5 A95 95 0 0 1 100 195 A47.5 47.5 0 0 1 100 100 A47.5 47.5 0 0 0 100 5Z" 
+          fill="url(#grad-light)"/>
+
+    <!-- Wave lines separating the halves -->
+    <path d="M100 8 Q85 30 100 52.5 Q115 75 100 100 Q85 125 100 147.5 Q115 170 100 192" 
+          fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <path d="M100 8 Q80 35 100 52.5 Q120 70 100 100 Q80 130 100 147.5 Q120 165 100 192" 
+          fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+
+    <!-- Network nodes on dark side (left) -->
+    <g fill="#4FC3F7" stroke="#4FC3F7" stroke-width="0.8">
+      <!-- Lines connecting nodes -->
+      <line x1="55" y1="45" x2="75" y2="60" opacity="0.6"/>
+      <line x1="55" y1="45" x2="40" y2="70" opacity="0.6"/>
+      <line x1="55" y1="45" x2="70" y2="35" opacity="0.6"/>
+      <line x1="75" y1="60" x2="40" y2="70" opacity="0.6"/>
+      <line x1="75" y1="60" x2="60" y2="85" opacity="0.6"/>
+      <line x1="40" y1="70" x2="30" y2="95" opacity="0.6"/>
+      <line x1="40" y1="70" x2="60" y2="85" opacity="0.6"/>
+      <line x1="60" y1="85" x2="30" y2="95" opacity="0.6"/>
+      <line x1="60" y1="85" x2="80" y2="80" opacity="0.6"/>
+      <line x1="30" y1="95" x2="45" y2="115" opacity="0.6"/>
+      <line x1="70" y1="35" x2="85" y2="25" opacity="0.6"/>
+      <line x1="70" y1="35" x2="75" y2="60" opacity="0.6"/>
+      <line x1="85" y1="25" x2="75" y2="60" opacity="0.6"/>
+      <line x1="45" y1="115" x2="60" y2="85" opacity="0.6"/>
+      <!-- Nodes -->
+      <circle cx="55" cy="45" r="3.5"/>
+      <circle cx="75" cy="60" r="3"/>
+      <circle cx="40" cy="70" r="3.5"/>
+      <circle cx="60" cy="85" r="3"/>
+      <circle cx="30" cy="95" r="3"/>
+      <circle cx="70" cy="35" r="2.5"/>
+      <circle cx="85" cy="25" r="2.5"/>
+      <circle cx="80" cy="80" r="2"/>
+      <circle cx="45" cy="115" r="2.5"/>
+    </g>
+
+    <!-- Network nodes on light side (right) -->
+    <g fill="#0D1B3E" stroke="#0D1B3E" stroke-width="0.8">
+      <!-- Lines connecting nodes -->
+      <line x1="135" y1="120" x2="155" y2="140" opacity="0.5"/>
+      <line x1="135" y1="120" x2="115" y2="135" opacity="0.5"/>
+      <line x1="135" y1="120" x2="150" y2="110" opacity="0.5"/>
+      <line x1="155" y1="140" x2="140" y2="160" opacity="0.5"/>
+      <line x1="155" y1="140" x2="165" y2="125" opacity="0.5"/>
+      <line x1="115" y1="135" x2="140" y2="160" opacity="0.5"/>
+      <line x1="115" y1="135" x2="120" y2="155" opacity="0.5"/>
+      <line x1="140" y1="160" x2="120" y2="155" opacity="0.5"/>
+      <line x1="140" y1="160" x2="155" y2="175" opacity="0.5"/>
+      <line x1="150" y1="110" x2="165" y2="125" opacity="0.5"/>
+      <line x1="120" y1="155" x2="130" y2="175" opacity="0.5"/>
+      <line x1="155" y1="175" x2="130" y2="175" opacity="0.5"/>
+      <!-- Nodes -->
+      <circle cx="135" cy="120" r="3.5"/>
+      <circle cx="155" cy="140" r="3"/>
+      <circle cx="115" cy="135" r="3"/>
+      <circle cx="140" cy="160" r="3.5"/>
+      <circle cx="165" cy="125" r="2.5"/>
+      <circle cx="150" cy="110" r="2.5"/>
+      <circle cx="120" cy="155" r="2.5"/>
+      <circle cx="155" cy="175" r="2.5"/>
+      <circle cx="130" cy="175" r="2"/>
+    </g>
+  </g>
+</svg>

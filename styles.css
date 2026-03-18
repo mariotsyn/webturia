@@ -77,19 +77,14 @@ a{color:inherit;text-decoration:none}
 }
 
 .pl-inner{text-align:center;position:relative;z-index:2;transition:transform .3s, opacity .3s}
-.pl-logo-wrap{
+.pl-logo{
   width:100px;height:100px;margin:0 auto 1.5rem;
-  border-radius:50%;background:#0A0A0F;
-  overflow:hidden;
   animation:orbP 2s ease infinite;
   filter:drop-shadow(0 0 20px rgba(99,102,241,.3));
   transition:filter .4s;
 }
-#preloader.done .pl-logo-wrap{
+#preloader.done .pl-logo{
   filter:drop-shadow(0 0 60px rgba(99,102,241,.8)) drop-shadow(0 0 120px rgba(6,182,212,.5));
-}
-.pl-logo{
-  width:100%;height:100%;display:block;
 }
 @keyframes orbP{0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(99,102,241,.3))}50%{transform:scale(1.08);filter:drop-shadow(0 0 40px rgba(99,102,241,.5))}}
 .pl-brand{font-family:var(--font);font-size:1.8rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
