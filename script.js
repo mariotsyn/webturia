@@ -908,20 +908,11 @@
     screen.position.z = 0.026;
     phoneGroup.add(screen);
 
-    // Screen glow edge
-    const edgeGeo = new THREE.PlaneGeometry(0.72, 1.42);
-    const edgeMat = new THREE.MeshBasicMaterial({
-      color: 0x6366F1, transparent: true, opacity: 0.15,
-    });
-    const edge = new THREE.Mesh(edgeGeo, edgeMat);
-    edge.position.z = 0.025;
-    phoneGroup.add(edge);
-
     // Store references for animation
     desk.screen = screen;
     desk.screenTexture = screenTexture;
     desk.drawScreenUI = drawPhoneScreenUI;
-    desk.screenEdge = edge;
+    desk.screenEdge = null;
 
     // Small dock/stand under the phone
     const dockMat = new THREE.MeshStandardMaterial({
