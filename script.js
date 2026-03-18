@@ -1055,8 +1055,8 @@
       onUpdate: self => {
         scrollProgress = self.progress;
 
-        // Activate warp overlay at 65%+
-        if (self.progress > 0.65) {
+        // Activate warp overlay at 65%+ (but only before content is revealed)
+        if (self.progress > 0.65 && !contentRevealed) {
           warpEl.classList.add('active');
           if (self.progress > 0.82) {
             warpEl.classList.add('intense');

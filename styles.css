@@ -82,7 +82,7 @@ a{color:inherit;text-decoration:none}
 .pl-logo{
   width:100px;height:100px;margin:0 auto 1.5rem;
   border-radius:50%;
-  background:#0A0A0F;
+  background:#fff;
   animation:orbP 2s ease infinite;
   filter:drop-shadow(0 0 20px rgba(99,102,241,.3));
   transition:filter .4s;
