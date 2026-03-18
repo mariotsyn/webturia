@@ -1123,8 +1123,12 @@
         canvasEl.classList.remove('fade');
         biosEl.classList.remove('active');
         flashEl.classList.remove('flash');
+        // Make sure scroll is unlocked
+        document.body.style.overflow = '';
         // Reset BIOS lines
         biosEl.querySelectorAll('.bios-line').forEach(l => l.classList.remove('vis'));
+        // Refresh scroll positions
+        ScrollTrigger.refresh();
       }
     });
   }
