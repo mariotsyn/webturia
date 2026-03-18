@@ -360,30 +360,40 @@
     scene.add(mouseGroup);
     desk.mouse = mouseGroup;
 
-    // Coffee mug — white ceramic with proper handle
+    // Coffee mug — white ceramic, open top to show coffee
     const mugGroup = new THREE.Group();
     const mugMat = new THREE.MeshStandardMaterial({
       color: 0xE8E4E0, metalness: 0.08, roughness: 0.75,
     });
 
-    // Mug body (slightly tapered cylinder)
-    const mugGeo = new THREE.CylinderGeometry(0.12, 0.10, 0.22, 24);
+    // Mug body — openEnded=true removes top AND bottom caps so coffee is visible
+    const mugGeo = new THREE.CylinderGeometry(0.12, 0.10, 0.22, 24, 1, true);
     const mug = new THREE.Mesh(mugGeo, mugMat);
     mugGroup.add(mug);
 
-    // Rim ring at top for realism
+    // Manual bottom cap (since openEnded removes both)
+    const bottomCap = new THREE.Mesh(
+      new THREE.CircleGeometry(0.10, 24),
+      mugMat
+    );
+    bottomCap.rotation.x = Math.PI / 2;
+    bottomCap.position.y = -0.11;
+    mugGroup.add(bottomCap);
+
+    // Rim ring at top
     const rimGeo = new THREE.TorusGeometry(0.12, 0.012, 8, 24);
     const rim = new THREE.Mesh(rimGeo, mugMat);
     rim.rotation.x = Math.PI / 2;
     rim.position.y = 0.11;
     mugGroup.add(rim);
 
-    // Black coffee inside — flat disc to avoid z-fighting with mug top cap
-    const coffeeGeo = new THREE.CircleGeometry(0.105, 24);
-    const coffeeMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-    const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
+    // Café con leche — warm brown, MeshBasicMaterial so lighting can't wash it out
+    const coffee = new THREE.Mesh(
+      new THREE.CircleGeometry(0.105, 24),
+      new THREE.MeshBasicMaterial({ color: 0xC4956A, side: THREE.DoubleSide })
+    );
     coffee.rotation.x = -Math.PI / 2;
-    coffee.position.y = 0.10;
+    coffee.position.y = 0.08;
     mugGroup.add(coffee);
 
     mugGroup.position.set(-1.8, 0.85, 0.4);
