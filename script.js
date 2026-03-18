@@ -11,11 +11,17 @@
   let scrollProgress = 0;
   let mouseNorm = { x: 0, y: 0 };
   let contentRevealed = false;
+  let isMobile = false;
 
   // Camera positions (start → end)
   const CAM_START = { x: 0, y: 4.5, z: 11 };
   const CAM_MID   = { x: 0, y: 2.2, z: 5 };
   const CAM_END   = { x: 0, y: 1.65, z: 0.6 };
+
+  // Mobile camera positions (closer, framing the phone)
+  const MOB_CAM_START = { x: 0, y: 3.5, z: 7 };
+  const MOB_CAM_MID   = { x: 0, y: 2.0, z: 3.5 };
+  const MOB_CAM_END   = { x: 0, y: 1.5, z: 0.5 };
 
   const LOOK_START = { x: 0, y: 1.2, z: 0 };
   const LOOK_END   = { x: 0, y: 1.6, z: -1 };
@@ -97,11 +103,18 @@
     scene.add(deskSpot);
     scene.add(deskSpot.target);
 
-    // Build the desk scene
+    // Detect mobile viewport
+    isMobile = window.innerWidth < 768;
+
+    // Build the scene
     createDesk();
-    createMonitor();
-    createKeyboard();
-    createGamingPC();
+    if (isMobile) {
+      createPhoneSetup();
+    } else {
+      createMonitor();
+      createKeyboard();
+      createGamingPC();
+    }
     createFloaters();
     createGridFloor();
     createParticles();
@@ -639,6 +652,292 @@
     desk.pc = pcGroup;
   }
 
+  /* ─── MOBILE PHONE SETUP ─── */
+  function createPhoneSetup() {
+    const phoneGroup = new THREE.Group();
+
+    // Phone body — dark metallic
+    const phoneMat = new THREE.MeshStandardMaterial({
+      color: 0x1A1A22, metalness: 0.7, roughness: 0.3,
+    });
+
+    // Main body (portrait rectangle)
+    const bodyGeo = new THREE.BoxGeometry(0.75, 1.5, 0.05);
+    const body = new THREE.Mesh(bodyGeo, phoneMat);
+    phoneGroup.add(body);
+
+    // Side frame edges (slightly lighter)
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x3A3A44, metalness: 0.8, roughness: 0.2,
+    });
+
+    // Volume button (right side)
+    const volBtn = new THREE.Mesh(
+      new THREE.BoxGeometry(0.008, 0.08, 0.02),
+      frameMat
+    );
+    volBtn.position.set(0.38, 0.2, 0);
+    phoneGroup.add(volBtn);
+
+    // Power button (right side)
+    const pwrBtn = new THREE.Mesh(
+      new THREE.BoxGeometry(0.008, 0.05, 0.02),
+      frameMat
+    );
+    pwrBtn.position.set(0.38, -0.05, 0);
+    phoneGroup.add(pwrBtn);
+
+    // Camera notch (top center)
+    const notch = new THREE.Mesh(
+      new THREE.CircleGeometry(0.018, 12),
+      new THREE.MeshBasicMaterial({ color: 0x111118 })
+    );
+    notch.position.set(0, 0.68, 0.026);
+    phoneGroup.add(notch);
+
+    // ── Screen with CanvasTexture (portrait) ──
+    const screenCanvas = document.createElement('canvas');
+    screenCanvas.width = 600;
+    screenCanvas.height = 1024;
+    const ctx = screenCanvas.getContext('2d');
+
+    // Portrait screen UI drawing
+    function drawPhoneScreenUI(time) {
+      const w = screenCanvas.width;
+      const h = screenCanvas.height;
+      const sp = scrollProgress;
+
+      if (sp < 0.55) {
+        drawPhoneNormalUI(time, w, h);
+      } else if (sp < 0.80) {
+        const glitchPct = (sp - 0.55) / 0.25;
+        drawPhoneNormalUI(time, w, h);
+        drawPhoneGlitch(time, w, h, glitchPct);
+      } else {
+        const warpPct = (sp - 0.80) / 0.20;
+        drawPhoneWarp(time, w, h, warpPct);
+      }
+    }
+
+    function drawPhoneNormalUI(time, w, h) {
+      ctx.fillStyle = '#0A0A0F';
+      ctx.fillRect(0, 0, w, h);
+
+      // Status bar
+      ctx.fillStyle = 'rgba(18,18,26,0.9)';
+      ctx.fillRect(0, 0, w, 50);
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('9:41', 24, 34);
+      ctx.fillText('100%', w - 60, 34);
+
+      // Nav bar
+      ctx.fillStyle = 'rgba(18,18,26,0.9)';
+      ctx.fillRect(0, 50, w, 48);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = '#6366F1';
+      ctx.fillText('W', 20, 82);
+      ctx.fillStyle = '#F0F0F5';
+      ctx.fillText('ebTuria', 34, 82);
+      // CTA button
+      const grad1 = ctx.createLinearGradient(w - 110, 62, w - 20, 82);
+      grad1.addColorStop(0, '#6366F1');
+      grad1.addColorStop(1, '#06B6D4');
+      ctx.fillStyle = grad1;
+      ctx.beginPath();
+      ctx.roundRect(w - 120, 62, 100, 26, 13);
+      ctx.fill();
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Hablemos →', w - 112, 80);
+
+      // Hero text (stacked for portrait)
+      ctx.font = 'bold 42px sans-serif';
+      ctx.fillStyle = '#F0F0F5';
+      ctx.fillText('Creamos', 30, 170);
+      ctx.fillText('experiencias', 30, 220);
+      const grad2 = ctx.createLinearGradient(30, 230, 400, 270);
+      grad2.addColorStop(0, '#6366F1');
+      grad2.addColorStop(0.5, '#06B6D4');
+      grad2.addColorStop(1, '#8B5CF6');
+      ctx.fillStyle = grad2;
+      ctx.fillText('inmersivas', 30, 270);
+
+      // Stats row
+      ctx.font = 'bold 18px sans-serif';
+      const stats = [{ n: '50+', l: 'Proyectos' }, { n: '98%', l: 'Satisfacción' }, { n: '5', l: 'Años' }];
+      stats.forEach((s, i) => {
+        const sx = 50 + i * 180;
+        ctx.fillStyle = '#6366F1';
+        ctx.fillText(s.n, sx, 340);
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = 'rgba(240,240,245,0.4)';
+        ctx.fillText(s.l, sx, 356);
+        ctx.font = 'bold 18px sans-serif';
+      });
+
+      // Cards stacked vertically (portrait layout)
+      const cardColors = ['#6366F1', '#06B6D4', '#8B5CF6'];
+      const titles = ['Diseño Web Premium', 'Automatización con IA', 'E-commerce'];
+      for (let i = 0; i < 3; i++) {
+        const cx = 20, cy = 400 + i * 95;
+        ctx.fillStyle = 'rgba(18,18,26,0.8)';
+        ctx.beginPath();
+        ctx.roundRect(cx, cy, w - 40, 80, 10);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = cardColors[i];
+        ctx.fillRect(cx, cy, 3, 80);
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillStyle = '#F0F0F5';
+        ctx.fillText(titles[i], cx + 18, cy + 28);
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = 'rgba(240,240,245,0.4)';
+        ctx.fillText('Tecnología de vanguardia', cx + 18, cy + 48);
+        for (let b = 0; b < 5; b++) {
+          const bh = 12 + Math.sin(time * 2 + b + i) * 6;
+          ctx.fillStyle = cardColors[i] + '40';
+          ctx.fillRect(cx + 18 + b * 28, cy + 70 - bh, 18, bh);
+        }
+      }
+
+      // Scan line
+      const scanY = (time * 80) % h;
+      ctx.fillStyle = 'rgba(99,102,241,0.03)';
+      ctx.fillRect(0, scanY, w, 2);
+    }
+
+    function drawPhoneGlitch(time, w, h, intensity) {
+      const numBars = Math.floor(3 + intensity * 12);
+      for (let i = 0; i < numBars; i++) {
+        const y = Math.floor(Math.random() * h);
+        const barH = 1 + Math.floor(Math.random() * (4 + intensity * 10));
+        const shift = (Math.random() - 0.5) * intensity * 50;
+        const imgData = ctx.getImageData(0, y, w, barH);
+        ctx.putImageData(imgData, shift, y);
+      }
+      if (intensity > 0.3) {
+        const splitAmt = Math.floor(intensity * 6);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = intensity * 0.12;
+        ctx.drawImage(screenCanvas, splitAmt, 0);
+        ctx.drawImage(screenCanvas, -splitAmt, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+      }
+      const numBlocks = Math.floor(intensity * 6);
+      for (let i = 0; i < numBlocks; i++) {
+        ctx.fillStyle = ['#6366F1', '#06B6D4', '#8B5CF6', '#000'][Math.floor(Math.random() * 4)];
+        ctx.globalAlpha = 0.3 + intensity * 0.4;
+        ctx.fillRect(Math.random() * w, Math.random() * h, 20 + Math.random() * 60, 2 + Math.random() * 8);
+        ctx.globalAlpha = 1;
+      }
+      for (let y = 0; y < h; y += 3) {
+        ctx.fillStyle = `rgba(0,0,0,${0.05 + intensity * 0.12})`;
+        ctx.fillRect(0, y, w, 1);
+      }
+      if (Math.random() < intensity * 0.12) {
+        ctx.fillStyle = `rgba(0,0,0,${0.4 + intensity * 0.4})`;
+        ctx.fillRect(0, 0, w, h);
+      }
+    }
+
+    const phoneWarpStars = [];
+    for (let i = 0; i < 200; i++) {
+      phoneWarpStars.push({
+        angle: Math.random() * Math.PI * 2,
+        dist: Math.random(),
+        speed: 0.3 + Math.random() * 0.7,
+        brightness: 0.3 + Math.random() * 0.7,
+      });
+    }
+
+    function drawPhoneWarp(time, w, h, intensity) {
+      ctx.fillStyle = '#000005';
+      ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const maxDist = Math.sqrt(cx * cx + cy * cy);
+      phoneWarpStars.forEach(star => {
+        const moveDist = ((star.dist + time * star.speed * 0.3) % 1);
+        const len = 2 + moveDist * (15 + intensity * 60);
+        const dist = moveDist * maxDist;
+        const x1 = cx + Math.cos(star.angle) * dist;
+        const y1 = cy + Math.sin(star.angle) * dist;
+        const x2 = cx + Math.cos(star.angle) * Math.max(0, dist - len);
+        const y2 = cy + Math.sin(star.angle) * Math.max(0, dist - len);
+        const alpha = star.brightness * (0.3 + intensity * 0.7) * moveDist;
+        ctx.strokeStyle = `rgba(${Math.floor(180 + 75 * (1 - intensity))},${Math.floor(180 + 75 * (1 - intensity * 0.5))},255,${alpha})`;
+        ctx.lineWidth = 0.5 + moveDist * (1 + intensity * 1.5);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      });
+      const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60 + intensity * 100);
+      glowGrad.addColorStop(0, `rgba(99,102,241,${0.1 + intensity * 0.3})`);
+      glowGrad.addColorStop(0.3, `rgba(6,182,212,${0.05 + intensity * 0.15})`);
+      glowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, w, h);
+      if (intensity > 0.6) {
+        const textAlpha = (intensity - 0.6) / 0.4;
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillStyle = `rgba(6,182,212,${textAlpha * 0.6})`;
+        ctx.textAlign = 'center';
+        ctx.fillText('E N T E R I N G', cx, cy + 80);
+        ctx.textAlign = 'start';
+      }
+    }
+
+    drawPhoneScreenUI(0);
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+
+    // Screen plane (portrait, slightly inset from body)
+    const screenGeo = new THREE.PlaneGeometry(0.68, 1.38);
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: screenTexture,
+      transparent: true,
+      opacity: 0.95,
+    });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.z = 0.026;
+    phoneGroup.add(screen);
+
+    // Screen glow edge
+    const edgeGeo = new THREE.PlaneGeometry(0.72, 1.42);
+    const edgeMat = new THREE.MeshBasicMaterial({
+      color: 0x6366F1, transparent: true, opacity: 0.15,
+    });
+    const edge = new THREE.Mesh(edgeGeo, edgeMat);
+    edge.position.z = 0.025;
+    phoneGroup.add(edge);
+
+    // Store references for animation
+    desk.screen = screen;
+    desk.screenTexture = screenTexture;
+    desk.drawScreenUI = drawPhoneScreenUI;
+    desk.screenEdge = edge;
+
+    // Small dock/stand under the phone
+    const dockMat = new THREE.MeshStandardMaterial({
+      color: 0x2A2A35, metalness: 0.6, roughness: 0.4,
+    });
+    const dock = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.06, 0.15),
+      dockMat
+    );
+    dock.position.set(0, -0.78, 0.02);
+    phoneGroup.add(dock);
+
+    // Position phone on desk, slightly tilted back
+    phoneGroup.position.set(0, 1.55, 0.1);
+    phoneGroup.rotation.x = -0.12; // slight tilt back
+    scene.add(phoneGroup);
+    desk.phone = phoneGroup;
+  }
+
   /* ─── FLOATING GEOMETRIC SHAPES ─── */
   function createFloaters() {
     const shapes = [
@@ -837,29 +1136,30 @@
     const t = clock.getElapsedTime();
 
     // ── Camera position based on scroll progress ──
-    // Phase 1: 0-0.3 → approach from above
-    // Phase 2: 0.3-0.7 → zoom toward monitor
-    // Phase 3: 0.7-1.0 → enter the screen
     const p = scrollProgress;
+
+    const cStart = isMobile ? MOB_CAM_START : CAM_START;
+    const cMid   = isMobile ? MOB_CAM_MID   : CAM_MID;
+    const cEnd   = isMobile ? MOB_CAM_END   : CAM_END;
+    const lookStartY = isMobile ? 1.0 : LOOK_START.y;
+    const lookMidY   = isMobile ? 1.4 : 1.5;
 
     let camX, camY, camZ, lookY;
 
     if (p < 0.4) {
-      // Start → Mid
       const t2 = p / 0.4;
-      const ease = t2 * t2 * (3 - 2 * t2); // smoothstep
-      camX = lerp(CAM_START.x, CAM_MID.x, ease);
-      camY = lerp(CAM_START.y, CAM_MID.y, ease);
-      camZ = lerp(CAM_START.z, CAM_MID.z, ease);
-      lookY = lerp(LOOK_START.y, 1.5, ease);
+      const ease = t2 * t2 * (3 - 2 * t2);
+      camX = lerp(cStart.x, cMid.x, ease);
+      camY = lerp(cStart.y, cMid.y, ease);
+      camZ = lerp(cStart.z, cMid.z, ease);
+      lookY = lerp(lookStartY, lookMidY, ease);
     } else {
-      // Mid → End (into the screen)
       const t2 = (p - 0.4) / 0.6;
       const ease = t2 * t2 * (3 - 2 * t2);
-      camX = lerp(CAM_MID.x, CAM_END.x, ease);
-      camY = lerp(CAM_MID.y, CAM_END.y, ease);
-      camZ = lerp(CAM_MID.z, CAM_END.z, ease);
-      lookY = lerp(1.5, LOOK_END.y, ease);
+      camX = lerp(cMid.x, cEnd.x, ease);
+      camY = lerp(cMid.y, cEnd.y, ease);
+      camZ = lerp(cMid.z, cEnd.z, ease);
+      lookY = lerp(lookMidY, LOOK_END.y, ease);
     }
 
     // Add subtle mouse-based camera offset
