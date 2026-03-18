@@ -20,11 +20,11 @@
 
   // Mobile camera positions — centered front → rise above → descend into phone
   const MOB_CAM_START = { x: 0, y: 1.8, z: 6 };
-  const MOB_CAM_MID   = { x: 0, y: 3.5, z: 0.8 };
-  const MOB_CAM_END   = { x: 0, y: 1.2, z: 0.12 };
-  const MOB_LOOK_START = { y: 0.78 };
-  const MOB_LOOK_MID   = { y: 0.78 };
-  const MOB_LOOK_END   = { y: 0.78 };
+  const MOB_CAM_MID   = { x: 0, y: 3.5, z: 0.5 };
+  const MOB_CAM_END   = { x: 0, y: 1.6, z: 0.1 };
+  const MOB_LOOK_START = { y: 0.78, z: -1 };
+  const MOB_LOOK_MID   = { y: 0.78, z: 0.1 };
+  const MOB_LOOK_END   = { y: 0.78, z: 0.1 };
 
   const LOOK_START = { x: 0, y: 1.2, z: 0 };
   const LOOK_END   = { x: 0, y: 1.6, z: -1 };
@@ -1192,7 +1192,17 @@
     camera.position.x = camX + mouseOffX;
     camera.position.y = camY + mouseOffY;
     camera.position.z = camZ;
-    camera.lookAt(mouseOffX * 0.3, lookY, -1);
+    if (isMobile) {
+      // Mobile: lookAt transitions from front-on to straight down at phone
+      const lookZ = lerp(
+        MOB_LOOK_START.z,
+        p < 0.35 ? MOB_LOOK_MID.z : MOB_LOOK_END.z,
+        Math.min(p / 0.35, 1)
+      );
+      camera.lookAt(mouseOffX * 0.3, lookY, lookZ);
+    } else {
+      camera.lookAt(mouseOffX * 0.3, lookY, -1);
+    }
 
     // ── Animate floaters ──
     floaters.forEach(f => {
