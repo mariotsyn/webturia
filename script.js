@@ -1080,9 +1080,6 @@
           biosRunning = true;
           contentRevealed = true;
 
-          // Lock scroll during animation
-          document.body.style.overflow = 'hidden';
-
           // Start BIOS boot sequence
           warpEl.classList.remove('active', 'intense');
           biosEl.classList.add('active');
@@ -1101,40 +1098,26 @@
             // Flash
             flashEl.classList.add('flash');
             setTimeout(() => flashEl.classList.remove('flash'), 400);
-            // Hide BIOS, show content, scroll to top of content
+            // Hide BIOS, show content
             setTimeout(() => {
               biosEl.classList.remove('active');
               contentEl.classList.add('visible');
-              // Scroll to end of spacer so content starts at top
-              const spacerBottom = spacer.offsetTop + spacer.offsetHeight;
-              window.scrollTo({ top: spacerBottom, behavior: 'instant' });
-              // Unlock scroll
-              document.body.style.overflow = '';
-              ScrollTrigger.refresh();
             }, 200);
           }, lastDelay + 600);
         }
-      }
-    });
-
-    // Detect scroll-back: when user scrolls above spacer bottom, reset everything
-    function resetToScene() {
-      if (!contentRevealed) return;
-      const spacerBottom = spacer.offsetTop + spacer.offsetHeight;
-      if (window.scrollY < spacerBottom - 300) {
+      },
+      onLeaveBack: () => {
+        // Reset everything when scrolling back up
         contentRevealed = false;
         biosRunning = false;
         contentEl.classList.remove('visible');
         canvasEl.classList.remove('fade');
         biosEl.classList.remove('active');
         flashEl.classList.remove('flash');
-        warpEl.classList.remove('active', 'intense');
-        document.body.style.overflow = '';
+        // Reset BIOS lines
         biosEl.querySelectorAll('.bios-line').forEach(l => l.classList.remove('vis'));
-        ScrollTrigger.refresh();
       }
-    }
-    window.addEventListener('scroll', resetToScene, { passive: true });
+    });
   }
 
   /* ═══════════════════════════════════════════════
